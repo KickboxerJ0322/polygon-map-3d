@@ -2,18 +2,33 @@ let map3DElement = null;
 let autocomplete = null;
 
 async function initMap() {
-    const { Map3DElement } = await google.maps.importLibrary("maps3d");
-    
-    map3DElement = new Map3DElement({
-        center: { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 }, // 竹芝
-        heading: 30,
-        tilt: 70,
-        range: 1000,
-    });
-    
-    document.getElementById('map').replaceWith(map3DElement);
-    initAutocomplete();
-    initRotateButton();
+    try {
+        console.log('Starting map initialization...');
+        await google.maps.importLibrary("maps");
+        const { Map3DElement } = await google.maps.importLibrary("maps3d");
+        
+        // Wait for custom element to be defined
+        await customElements.whenDefined('gmp-map-3d');
+        
+        // Create new Map3D element
+        map3DElement = new Map3DElement({
+            center: { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 }, // Takeshiba
+            heading: 30,
+            tilt: 70,
+            range: 1000
+        });
+        
+        // Replace the existing element with the new map
+        const mapContainer = document.getElementById('map');
+        mapContainer.replaceWith(map3DElement);
+        
+        await initAutocomplete();
+        initRotateButton();
+        console.log('Map initialized successfully');
+    } catch (error) {
+        console.error('Map initialization error:', error);
+        console.error(error.stack);
+    }
 }
 
 async function initAutocomplete() {
@@ -139,34 +154,5 @@ function initControls() {
     initFlyToButton();
 }
 
-// Google Maps APIのコールバック関数として実行
-async function initMap() {
-    try {
-        console.log('Starting map initialization...');
-        await google.maps.importLibrary("maps3d");
-        await google.maps.importLibrary("places");
-        
-        map3DElement = new google.maps.Map3DElement({
-            center: { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 },
-            heading: 30,
-            tilt: 70,
-            range: 1000,
-        });
-        
-        const mapContainer = document.getElementById('map');
-        if (mapContainer) {
-            mapContainer.replaceWith(map3DElement);
-            await initAutocomplete();
-            initControls();
-            console.log('Map initialized successfully');
-        } else {
-            console.error('Map container not found');
-        }
-    } catch (error) {
-        console.error('Map initialization error:', error);
-        console.error(error.stack);
-    }
-}
-
-// グローバルスコープで関数を公開
+// Expose initMap to global scope
 window.initMap = initMap;
