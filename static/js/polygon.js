@@ -83,7 +83,9 @@ async function createPolygon() {
         coordinates: coordinates,
         height: Number(document.getElementById('height-input').value),
         fill_color: document.getElementById('fill-color').value,
+        fill_opacity: Number(document.getElementById('fill-opacity').value) / 100,
         stroke_color: document.getElementById('stroke-color').value,
+        stroke_opacity: Number(document.getElementById('stroke-opacity').value) / 100,
         stroke_width: Number(document.getElementById('stroke-width').value)
     };
     
@@ -142,8 +144,8 @@ async function loadPolygons() {
         polygons.forEach(polygonData => {
             const polygon = new Polygon3DElement({
                 altitudeMode: AltitudeMode.RELATIVE_TO_GROUND,
-                fillColor: polygonData.fill_color,
-                strokeColor: polygonData.stroke_color,
+                fillColor: hexToRGBA(polygonData.fill_color, polygonData.fill_opacity),
+                strokeColor: hexToRGBA(polygonData.stroke_color, polygonData.stroke_opacity),
                 strokeWidth: polygonData.stroke_width,
                 extruded: true
             });
@@ -286,11 +288,13 @@ async function updatePolygon() {
         
         // ポリゴンデータの作成
         const polygonData = {
-            name: `Polygon ${currentEditingId}`,
+            name: document.getElementById('polygon-name').value,
             coordinates: coordinates,
             height: height,
             fill_color: document.getElementById('fill-color').value,
+            fill_opacity: Number(document.getElementById('fill-opacity').value) / 100,
             stroke_color: document.getElementById('stroke-color').value,
+            stroke_opacity: Number(document.getElementById('stroke-opacity').value) / 100,
             stroke_width: Number(document.getElementById('stroke-width').value)
         };
         
