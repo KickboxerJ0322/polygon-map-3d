@@ -73,9 +73,13 @@ async function createPolygon() {
         polygon.outerCoordinates = coordinates;
         map3DElement.append(polygon);
     
+    // Set default name if empty
+    const placeName = document.getElementById('pac-input').value || `Polygon ${polygons.length + 1}`;
+    document.getElementById('polygon-name').value = placeName;
+    
     // Save to database
     const polygonData = {
-        name: `Polygon ${polygons.length + 1}`,
+        name: document.getElementById('polygon-name').value,
         coordinates: coordinates,
         height: Number(document.getElementById('height-input').value),
         fill_color: document.getElementById('fill-color').value,
@@ -210,6 +214,7 @@ async function editPolygon(id) {
             }
         });
         
+        document.getElementById('polygon-name').value = polygon.name;
         document.getElementById('height-input').value = polygon.height;
         document.getElementById('fill-color').value = polygon.fill_color;
         document.getElementById('stroke-color').value = polygon.stroke_color;
