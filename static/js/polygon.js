@@ -207,7 +207,7 @@ let currentEditingId = null;
 async function editPolygon(id) {
     try {
         // 編集中のポリゴンIDを保存
-        currentEditingId = id;
+        currentEditingId = null;  // 編集モードではなく、データコピーモードとして扱う
         
         // 該当するポリゴンを取得
         const polygon = polygons.find(p => p.id === id);
@@ -226,23 +226,20 @@ async function editPolygon(id) {
             }
         });
         
+        // 各フィールドの値を設定
         document.getElementById('polygon-name').value = polygon.name;
         document.getElementById('height-input').value = polygon.height;
         document.getElementById('fill-color').value = polygon.fill_color;
+        document.getElementById('fill-opacity').value = polygon.fill_opacity * 100;
         document.getElementById('stroke-color').value = polygon.stroke_color;
+        document.getElementById('stroke-opacity').value = polygon.stroke_opacity * 100;
         document.getElementById('stroke-width').value = polygon.stroke_width;
         
-        // 既存のポリゴンを地図から一時的に非表示
-        const existingPolygon = map3DElement.querySelector(`gmp-polygon-3d[data-id="${id}"]`);
-        if (existingPolygon) {
-            existingPolygon.style.display = 'none';
-        }
-        
         // ボタンの状態を更新
-        document.getElementById('create-polygon').disabled = true;
-        document.getElementById('update-polygon').disabled = false;
-        document.getElementById('cancel-edit').style.display = 'inline-block';
-        
+        document.getElementById('create-polygon').disabled = false;
+        document.getElementById('update-polygon').disabled = true;
+        document.getElementById('update-polygon').style.display = 'none';
+        document.getElementById('cancel-edit').style.display = 'none';
     } catch (error) {
         console.error('エラー:', error.message);
         alert(error.message);
