@@ -53,10 +53,18 @@ async function createPolygon() {
             strokeColor: document.getElementById('stroke-color').value
         });
         
+        // 透明度の取得
+        const fillOpacity = document.getElementById('fill-opacity').value / 100;
+        const strokeOpacity = document.getElementById('stroke-opacity').value / 100;
+        
+        // 色と透明度を設定
+        const fillColor = hexToRGBA(document.getElementById('fill-color').value, fillOpacity);
+        const strokeColor = hexToRGBA(document.getElementById('stroke-color').value, strokeOpacity);
+        
         // ポリゴンの属性を設定
         polygon.setAttribute('altitude-mode', 'relative-to-ground');
-        polygon.setAttribute('fill-color', document.getElementById('fill-color').value);
-        polygon.setAttribute('stroke-color', document.getElementById('stroke-color').value);
+        polygon.setAttribute('fill-color', fillColor);
+        polygon.setAttribute('stroke-color', strokeColor);
         polygon.setAttribute('stroke-width', document.getElementById('stroke-width').value);
         polygon.setAttribute('extruded', 'true');
         
