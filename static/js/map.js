@@ -31,18 +31,29 @@ async function initMap() {
 }
 
 async function initAutocomplete() {
-    const { Autocomplete } = await google.maps.importLibrary("places");
-    
-    autocomplete = new Autocomplete(document.getElementById("pac-input"), {
-        fields: ["geometry", "name", "place_id"],
-    });
-    
-    autocomplete.addListener("place_changed", async () => {
-        const place = autocomplete.getPlace();
-        if (!place.geometry) {
-            alert("場所が見つかりませんでした: " + place.name);
-            return;
+    try {
+        console.log('Places APIの初期化を開始...');
+        const { Autocomplete } = await google.maps.importLibrary("places");
+        console.log('Places APIのライブラリを読み込みました');
+        
+        const input = document.getElementById("pac-input");
+        if (!input) {
+            throw new Error('検索入力フィールドが見つかりません');
         }
+        
+        autocomplete = new Autocomplete(input, {
+            fields: ["geometry", "name", "place_id"],
+        });
+        console.log('Autocompleteを初期化しました');
+        
+        autocomplete.addListener("place_changed", async () => {
+            console.log('場所が選択されました');
+            const place = autocomplete.getPlace();
+            if (!place.geometry) {
+                console.error('選択された場所の位置情報が取得できません:', place);
+                alert("場所が見つかりませんでした: " + place.name);
+                return;
+            }
         
         const location = place.geometry.location;
         const viewport = place.geometry.viewport;
