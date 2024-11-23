@@ -143,25 +143,23 @@ function initControls() {
 async function initMap() {
     try {
         console.log('Starting map initialization...');
-        await google.maps.importLibrary("maps3d");
-        await google.maps.importLibrary("places");
+        const { Autocomplete } = await google.maps.importLibrary("places");
         
-        map3DElement = new google.maps.Map3DElement({
-            center: { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 },
-            heading: 30,
-            tilt: 70,
-            range: 1000,
-        });
+        // gmp-map-3dカスタム要素を取得
+        map3DElement = document.querySelector('gmp-map-3d');
         
-        const mapContainer = document.getElementById('map');
-        if (mapContainer) {
-            mapContainer.replaceWith(map3DElement);
-            await initAutocomplete();
-            initControls();
-            console.log('Map initialized successfully');
-        } else {
-            console.error('Map container not found');
-        }
+        // カスタム要素が定義されるのを待つ
+        await customElements.whenDefined(map3DElement.localName);
+        
+        // 地図の初期設定
+        map3DElement.center = { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 };
+        map3DElement.heading = 30;
+        map3DElement.tilt = 70;
+        map3DElement.range = 1000;
+        
+        await initAutocomplete();
+        initControls();
+        console.log('Map initialized successfully');
     } catch (error) {
         console.error('Map initialization error:', error);
         console.error(error.stack);

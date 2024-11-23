@@ -2,7 +2,8 @@ let polygons = [];
 
 async function createPolygon() {
     try {
-        const { Polygon3DElement, AltitudeMode } = await google.maps.importLibrary("maps3d");
+        // gmp-polygon-3dカスタム要素を作成
+        const polygon = document.createElement('gmp-polygon-3d');
         
         // Validate inputs
         const coordinates = [];
@@ -52,14 +53,15 @@ async function createPolygon() {
             strokeColor: document.getElementById('stroke-color').value
         });
         
-        const polygon = new Polygon3DElement({
-            altitudeMode: AltitudeMode.RELATIVE_TO_GROUND,
-            fillColor: document.getElementById('fill-color').value,
-            strokeColor: document.getElementById('stroke-color').value,
-            strokeWidth: Number(document.getElementById('stroke-width').value),
-            extruded: true
-        });
+        // ポリゴンの属性を設定
+        polygon.setAttribute('altitude-mode', 'relative-to-ground');
+        polygon.setAttribute('fill-color', document.getElementById('fill-color').value);
+        polygon.setAttribute('stroke-color', document.getElementById('stroke-color').value);
+        polygon.setAttribute('stroke-width', document.getElementById('stroke-width').value);
+        polygon.setAttribute('extruded', 'true');
         
+        // カスタム要素が定義されるのを待つ
+        await customElements.whenDefined(polygon.localName);
         polygon.outerCoordinates = coordinates;
         map3DElement.append(polygon);
     
