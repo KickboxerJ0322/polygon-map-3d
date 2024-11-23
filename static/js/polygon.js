@@ -235,11 +235,8 @@ async function editPolygon(id) {
         document.getElementById('stroke-opacity').value = polygon.stroke_opacity * 100;
         document.getElementById('stroke-width').value = polygon.stroke_width;
         
-        // ボタンの状態を更新
+        // create-polygonボタンは有効のまま
         document.getElementById('create-polygon').disabled = false;
-        document.getElementById('update-polygon').disabled = true;
-        document.getElementById('update-polygon').style.display = 'none';
-        document.getElementById('cancel-edit').style.display = 'none';
     } catch (error) {
         console.error('エラー:', error.message);
         alert(error.message);
