@@ -1,28 +1,57 @@
 let polygons = [];
 
 async function createPolygon() {
-    const { Polygon3DElement, AltitudeMode } = await google.maps.importLibrary("maps3d");
-    
-    const coordinates = Array.from(document.querySelectorAll('.coordinate-input'))
-        .map(input => {
+    try {
+        const { Polygon3DElement, AltitudeMode } = await google.maps.importLibrary("maps3d");
+        
+        // Validate inputs
+        const coordinateInputs = document.querySelectorAll('.coordinate-input');
+        const coordinates = [];
+        
+        for (let i = 0; i < coordinateInputs.length; i++) {
+            const input = coordinateInputs[i];
+            if (!input.value) {
+                throw new Error(`ポイント ${i + 1} の座標が入力されていません。`);
+            }
+            
             const [lat, lng] = input.value.split(',').map(Number);
-            return {
+            
+            if (isNaN(lat) || isNaN(lng) || 
+                lat < -90 || lat > 90 || 
+                lng < -180 || lng > 180) {
+                throw new Error(`ポイント ${i + 1} の座標が無効です。緯度は -90 から 90、経度は -180 から 180 の間である必要があります。`);
+            }
+            
+            coordinates.push({
                 lat,
                 lng,
-                altitude: Number(document.getElementById('height-input').value)
-            };
+                altitude: Number(document.getElementById('height-input').value) || 0
+            });
+        }
+        
+        // Validate height
+        const height = Number(document.getElementById('height-input').value);
+        if (isNaN(height) || height < 0) {
+            throw new Error('高さは0以上の数値を入力してください。');
+        }
+        
+        console.log('ポリゴンを作成中:', {
+            coordinates,
+            height,
+            fillColor: document.getElementById('fill-color').value,
+            strokeColor: document.getElementById('stroke-color').value
         });
-    
-    const polygon = new Polygon3DElement({
-        altitudeMode: AltitudeMode.RELATIVE_TO_GROUND,
-        fillColor: document.getElementById('fill-color').value,
-        strokeColor: document.getElementById('stroke-color').value,
-        strokeWidth: Number(document.getElementById('stroke-width').value),
-        extruded: true
-    });
-    
-    polygon.outerCoordinates = coordinates;
-    map3DElement.append(polygon);
+        
+        const polygon = new Polygon3DElement({
+            altitudeMode: AltitudeMode.RELATIVE_TO_GROUND,
+            fillColor: document.getElementById('fill-color').value,
+            strokeColor: document.getElementById('stroke-color').value,
+            strokeWidth: Number(document.getElementById('stroke-width').value),
+            extruded: true
+        });
+        
+        polygon.outerCoordinates = coordinates;
+        map3DElement.append(polygon);
     
     // Save to database
     const polygonData = {
@@ -47,6 +76,13 @@ async function createPolygon() {
         polygonData.id = result.id;
         polygons.push(polygonData);
         updatePolygonTable();
+        console.log('ポリゴンが正常に保存されました。');
+    } else {
+        throw new Error('ポリゴンの保存中にエラーが発生しました。');
+    }
+    } catch (error) {
+        console.error('エラー:', error.message);
+        alert(error.message);
     }
 }
 
