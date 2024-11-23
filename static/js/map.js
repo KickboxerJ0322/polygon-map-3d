@@ -14,6 +14,11 @@ async function initMap() {
             </div>
         `;
 
+        // Wait for the Google Maps API to be fully loaded
+        if (!window.google || !window.google.maps) {
+            throw new Error('Google Maps API not loaded. Please check your API key and internet connection.');
+        }
+
         // Import required libraries with proper error handling
         let Map3DElement, Autocomplete, ElevationService;
         try {
@@ -58,6 +63,8 @@ async function initMap() {
         
         console.log('Map initialized successfully');
         
+        const durationSeconds = Number(document.getElementById('rotation-duration').value) || 5;
+
         // Add initial animation
         map3DElement.flyCameraTo({
             endCamera: {
@@ -65,7 +72,7 @@ async function initMap() {
                 tilt: 67.5,
                 range: 2000
             },
-            durationMillis: 2000
+            durationMillis: durationSeconds * 1000
         });
 
         // Add labels toggle event listener
@@ -126,7 +133,9 @@ async function initAutocomplete() {
             
             console.log(`場所が選択されました: ${placeName}`);
             console.log('位置情報:', { lat: location.lat(), lng: location.lng() });
-            
+
+            const durationSeconds = Number(document.getElementById('rotation-duration').value) || 5;
+
             // カメラを選択した場所に移動
             map3DElement.flyCameraTo({
                 endCamera: {
@@ -138,7 +147,7 @@ async function initAutocomplete() {
                     tilt: 67.5,
                     range: 500
                 },
-                durationMillis: 2000
+                durationMillis: durationSeconds * 1000
             });
             
             // ビューポートが存在する場合、ポリラインを表示

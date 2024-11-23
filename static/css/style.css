@@ -37,3 +37,9 @@ gmp-map-3d {
     display: inline-block;
     vertical-align: middle;
 }
+.control-panel img {
+    height: 30px;
+    width: auto;
+    object-fit: contain;
+    background: transparent;
+}
