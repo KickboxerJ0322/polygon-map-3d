@@ -32,3 +32,8 @@ gmp-map-3d {
 .table {
     margin-top: 20px;
 }
+
+.control-panel h4 {
+    display: inline-block;
+    vertical-align: middle;
+}

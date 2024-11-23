@@ -4,6 +4,7 @@
     <title>3D Polygon Map Creator</title>
     <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
     <link href="/static/css/style.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/static/images/png_Polygon_map_3d.png">
 </head>
 <body>
     <div class="container-fluid">
@@ -11,7 +12,10 @@
             <!-- Control Panel -->
             <div class="col-md-3">
                 <div class="control-panel">
-                    <h4 class="mb-3">Polygon Map 3D</h4>
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="/static/images/png_Polygon_map_3d.png" alt="Polygon Map 3D" class="me-2" style="height: 30px; width: auto;">
+                        <h4 class="mb-0">Polygon Map 3D</h4>
+                    </div>
                     <div class="search-box mb-3">
                         <input type="text" id="pac-input" class="form-control" placeholder="Navigate to a place">
                     </div>
@@ -172,67 +176,9 @@
     </div>
 
     <script>
-        function loadGoogleMapsAPI() {
-            return new Promise((resolve, reject) => {
-                const mapContainer = document.getElementById('map-container');
-                
-                // Show loading state
-                mapContainer.innerHTML = `
-                    <div class="d-flex flex-column justify-content-center align-items-center h-100">
-                        <div class="spinner-border text-primary mb-3" role="status">
-                            <span class="visually-hidden">Loading Maps API...</span>
-                        </div>
-                        <div>Initializing Google Maps...</div>
-                    </div>
-                `;
-
-                const script = document.createElement('script');
-                script.src = `https://maps.googleapis.com/maps/api/js?key={{ maps_api_key }}&v=alpha&libraries=maps3d,places,elevation&callback=initMapCallback`;
-                script.async = true;
-                script.defer = true;
-                
-                let timeoutId = setTimeout(() => {
-                    reject(new Error('Google Maps API loading timeout'));
-                }, 20000); // 20 second timeout
-
-                script.onerror = () => {
-                    clearTimeout(timeoutId);
-                    mapContainer.innerHTML = `
-                        <div class="alert alert-danger">
-                            <h4 class="alert-heading">Failed to Load Google Maps</h4>
-                            <p>Unable to load the Google Maps API. This might be due to:</p>
-                            <ul>
-                                <li>Invalid API key</li>
-                                <li>Missing required API services:
-                                    <ul>
-                                        <li>Maps JavaScript API</li>
-                                        <li>Maps 3D API (beta)</li>
-                                        <li>Places API</li>
-                                        <li>Elevation API</li>
-                                    </ul>
-                                </li>
-                                <li>Network connectivity issues</li>
-                            </ul>
-                            <button class="btn btn-primary mt-3" onclick="window.location.reload()">
-                                <i class="fas fa-sync-alt me-2"></i>Retry
-                            </button>
-                        </div>
-                    `;
-                    reject(new Error('Failed to load Google Maps API'));
-                };
-
-                window.initMapCallback = () => {
-                    clearTimeout(timeoutId);
-                    resolve();
-                };
-
-                document.head.appendChild(script);
-            });
-        }
-
-        // Initialize Google Maps API with proper error handling
-        loadGoogleMapsAPI().catch(error => {
-            console.error('Google Maps API loading error:', error);
+        (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+            key: "{{ maps_api_key }}",
+            v: "alpha"
         });
     </script>
     <script src="/static/js/map.js"></script>

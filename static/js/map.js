@@ -14,24 +14,6 @@ async function initMap() {
             </div>
         `;
 
-        // Wait for Google Maps API to be fully loaded
-        if (!window.google || !window.google.maps) {
-            await new Promise((resolve, reject) => {
-                const checkGoogleMaps = setInterval(() => {
-                    if (window.google && window.google.maps) {
-                        clearInterval(checkGoogleMaps);
-                        resolve();
-                    }
-                }, 100);
-                
-                // Timeout after 10 seconds
-                setTimeout(() => {
-                    clearInterval(checkGoogleMaps);
-                    reject(new Error('Google Maps API failed to load'));
-                }, 10000);
-            });
-        }
-
         // Import required libraries with proper error handling
         let Map3DElement, Autocomplete, ElevationService;
         try {

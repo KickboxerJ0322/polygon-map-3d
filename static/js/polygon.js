@@ -357,9 +357,13 @@ async function updatePolygon() {
 
 function cancelEdit() {
     currentEditingId = null;
-    document.getElementById('create-polygon').disabled = false;
-    document.getElementById('update-polygon').disabled = true;
-    document.getElementById('cancel-edit').style.display = 'none';
+    const createPolygonBtn = document.getElementById('create-polygon');
+    const updatePolygonBtn = document.getElementById('update-polygon');
+    const cancelEditBtn = document.getElementById('cancel-edit');
+    
+    if (createPolygonBtn) createPolygonBtn.disabled = false;
+    if (updatePolygonBtn) updatePolygonBtn.disabled = true;
+    if (cancelEditBtn) cancelEditBtn.style.display = 'none';
     
     // フォームをリセット
     document.querySelectorAll('.coordinate-lat, .coordinate-lng').forEach(input => {
