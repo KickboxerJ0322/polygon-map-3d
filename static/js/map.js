@@ -5,33 +5,23 @@ async function initMap() {
     try {
         console.log('Starting map initialization...');
         
-        // Wait for the Maps JavaScript API to fully load
-        while (!window.google || !window.google.maps) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        console.log('Google Maps API loaded successfully');
-
         // Import required libraries first
-        try {
-            const libraries = await Promise.all([
-                google.maps.importLibrary("maps3d"),
-                google.maps.importLibrary("places"),
-                google.maps.importLibrary("elevation")
-            ]);
-            
-            const [maps3d, places, elevation] = libraries;
-            console.log('Required libraries loaded successfully');
-
-            // Create new map instance
-            const mapOptions = {
-                center: { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 },
-                heading: 30,
-                tilt: 70,
-                range: 1000,
-                mapId: 'demo-map'  // Add a unique mapId
-            };
-            
-            map3DElement = new maps3d.Map3DElement(mapOptions);
+        const [{ Map3DElement }, { Autocomplete }, { ElevationService }] = await Promise.all([
+            google.maps.importLibrary("maps3d"),
+            google.maps.importLibrary("places"),
+            google.maps.importLibrary("elevation")
+        ]);
+        
+        // Wait for custom element to be defined
+        await customElements.whenDefined('gmp-map-3d');
+        
+        // Create new map instance
+        map3DElement = new Map3DElement({
+            center: { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 },
+            heading: 30,
+            tilt: 70,
+            range: 1000
+        });
         
         // Replace existing map container content
         const mapContainer = document.getElementById('map-container');

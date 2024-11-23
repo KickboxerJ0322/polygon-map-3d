@@ -1,14 +1,9 @@
 let polygons = [];
 
 async function createPolygon() {
-    console.log('createPolygon関数が呼び出されました');
     try {
-        console.log('ポリゴン作成処理を開始します...');
-        
         // gmp-polygon-3dカスタム要素を作成
-        console.log('gmp-polygon-3dカスタム要素を作成中...');
         const polygon = document.createElement('gmp-polygon-3d');
-        console.log('カスタム要素が作成されました');
         
         // Validate inputs
         const coordinates = [];
@@ -78,22 +73,13 @@ async function createPolygon() {
         polygon.outerCoordinates = coordinates;
         map3DElement.append(polygon);
     
-    console.log('ポリゴンの描画が完了しました。データベースへの保存を開始します...');
-    
     // Save to database
-    console.log('透明度の設定を取得中...');
-    const fillOpacity = Number(document.getElementById('fill-opacity').value) / 100;
-    const strokeOpacity = Number(document.getElementById('stroke-opacity').value) / 100;
-    
-    console.log('ポリゴンデータを準備中...');
     const polygonData = {
         name: `Polygon ${polygons.length + 1}`,
         coordinates: coordinates,
         height: Number(document.getElementById('height-input').value),
         fill_color: document.getElementById('fill-color').value,
-        fill_opacity: fillOpacity,
         stroke_color: document.getElementById('stroke-color').value,
-        stroke_opacity: strokeOpacity,
         stroke_width: Number(document.getElementById('stroke-width').value)
     };
     
@@ -129,18 +115,8 @@ function updatePolygonTable() {
         row.innerHTML = `
             <td>${polygon.name}</td>
             <td>${polygon.height}m</td>
-            <td>
-                <div class="d-flex align-items-center">
-                    <div style="background-color: ${hexToRGBA(polygon.fill_color, polygon.fill_opacity)}; width: 20px; height: 20px; margin-right: 8px;"></div>
-                    ${Math.round(polygon.fill_opacity * 100)}%
-                </div>
-            </td>
-            <td>
-                <div class="d-flex align-items-center">
-                    <div style="background-color: ${hexToRGBA(polygon.stroke_color, polygon.stroke_opacity)}; width: 20px; height: 20px; margin-right: 8px;"></div>
-                    ${Math.round(polygon.stroke_opacity * 100)}%
-                </div>
-            </td>
+            <td><div style="background-color: ${polygon.fill_color}; width: 20px; height: 20px;"></div></td>
+            <td><div style="background-color: ${polygon.stroke_color}; width: 20px; height: 20px;"></div></td>
             <td>
                 <button class="btn btn-sm btn-primary me-2" onclick="editPolygon(${polygon.id})">Edit</button>
                 <button class="btn btn-sm btn-danger" onclick="deletePolygon(${polygon.id})">Delete</button>
@@ -180,21 +156,7 @@ function hexToRGBA(hex, opacity) {
     return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 }
 
-// DOMContentLoadedイベント内でイベントリスナーを登録
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('ポリゴン作成機能の初期化を開始します...');
-    const createPolygonButton = document.getElementById('create-polygon');
-    
-    if (createPolygonButton) {
-        console.log('create-polygonボタンが見つかりました');
-        createPolygonButton.addEventListener('click', () => {
-            console.log('ポリゴン作成ボタンがクリックされました');
-            createPolygon();
-        });
-    } else {
-        console.error('create-polygonボタンが見つかりません');
-    }
-});
+document.getElementById('create-polygon').addEventListener('click', createPolygon);
 async function deletePolygon(id) {
     if (!confirm('このポリゴンを削除してもよろしいですか？')) {
         return;
