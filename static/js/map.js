@@ -61,7 +61,7 @@ async function initAutocomplete() {
                 tilt: 67.5,
                 range: 500
             },
-            durationMillis: 7000
+            durationMillis: 2000
         });
         
         // ビューポートが存在する場合、ポリラインを表示
@@ -115,7 +115,7 @@ function initRotateButton() {
                 tilt: 70,
                 range: 1000
             },
-            durationMillis: Number(document.getElementById('camera-duration').value),
+            durationMillis: 30000,
             rounds: 1
         });
     });
