@@ -2,69 +2,33 @@ let map3DElement = null;
 let autocomplete = null;
 
 async function initMap() {
-    try {
-        console.log('Starting map initialization...');
-        const { Map3DElement } = await google.maps.importLibrary("maps3d");
-        
-        // Create map element with initial configuration
-        map3DElement = new Map3DElement({
-            center: { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 },
-            heading: 30,
-            tilt: 70,
-            range: 1000
-        });
-        
-        // Replace existing map element
-        const mapContainer = document.getElementById('map');
-        if (mapContainer) {
-            mapContainer.replaceWith(map3DElement);
-            await initAutocomplete();
-            initControls();
-            console.log('Map initialized successfully');
-        } else {
-            console.error('Map container not found');
-        }
-    } catch (error) {
-        console.error('Map initialization error:', error);
-        console.error(error.stack);
-    }
+    const { Map3DElement } = await google.maps.importLibrary("maps3d");
+    
+    map3DElement = new Map3DElement({
+        center: { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 }, // 竹芝
+        heading: 30,
+        tilt: 70,
+        range: 1000,
+    });
+    
+    document.getElementById('map').replaceWith(map3DElement);
+    initAutocomplete();
+    initRotateButton();
 }
 
 async function initAutocomplete() {
-    try {
-        console.log('Places APIの初期化を開始...');
-        const { Autocomplete } = await google.maps.importLibrary("places").catch(error => {
-            console.error('Places APIのロードに失敗しました:', error);
-            throw error;
-        });
-        console.log('Places APIのライブラリを正常に読み込みました');
-        
-        const input = document.getElementById("pac-input");
-        if (!input) {
-            throw new Error('検索入力フィールドが見つかりません');
+    const { Autocomplete } = await google.maps.importLibrary("places");
+    
+    autocomplete = new Autocomplete(document.getElementById("pac-input"), {
+        fields: ["geometry", "name", "place_id"],
+    });
+    
+    autocomplete.addListener("place_changed", async () => {
+        const place = autocomplete.getPlace();
+        if (!place.geometry) {
+            alert("場所が見つかりませんでした: " + place.name);
+            return;
         }
-        
-        try {
-            autocomplete = new Autocomplete(input, {
-                fields: ["geometry", "name", "place_id"],
-            });
-            console.log('Autocompleteを正常に初期化しました');
-        } catch (error) {
-            console.error('Autocompleteの初期化に失敗しました:', error);
-            throw error;
-        }
-        
-        autocomplete.addListener("place_changed", async () => {
-            console.log('場所の選択イベントが発生しました');
-            try {
-                const place = autocomplete.getPlace();
-                console.log('選択された場所の情報:', place);
-                
-                if (!place.geometry) {
-                    console.error('場所の位置情報が取得できません:', place);
-                    alert("場所が見つかりませんでした: " + place.name);
-                    return;
-                }
         
         const location = place.geometry.location;
         const viewport = place.geometry.viewport;
@@ -173,6 +137,35 @@ function initFlyToButton() {
 function initControls() {
     initRotateButton();
     initFlyToButton();
+}
+
+// Google Maps APIのコールバック関数として実行
+async function initMap() {
+    try {
+        console.log('Starting map initialization...');
+        await google.maps.importLibrary("maps3d");
+        await google.maps.importLibrary("places");
+        
+        map3DElement = new google.maps.Map3DElement({
+            center: { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 },
+            heading: 30,
+            tilt: 70,
+            range: 1000,
+        });
+        
+        const mapContainer = document.getElementById('map');
+        if (mapContainer) {
+            mapContainer.replaceWith(map3DElement);
+            await initAutocomplete();
+            initControls();
+            console.log('Map initialized successfully');
+        } else {
+            console.error('Map container not found');
+        }
+    } catch (error) {
+        console.error('Map initialization error:', error);
+        console.error(error.stack);
+    }
 }
 
 // グローバルスコープで関数を公開
