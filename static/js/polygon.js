@@ -5,16 +5,26 @@ async function createPolygon() {
         const { Polygon3DElement, AltitudeMode } = await google.maps.importLibrary("maps3d");
         
         // Validate inputs
-        const coordinateInputs = document.querySelectorAll('.coordinate-input');
         const coordinates = [];
+        console.log('座標の検証を開始します...');
         
-        for (let i = 0; i < coordinateInputs.length; i++) {
-            const input = coordinateInputs[i];
-            if (!input.value) {
-                throw new Error(`ポイント ${i + 1} の座標が入力されていません。`);
+        for (let i = 1; i <= 4; i++) {
+            const latInput = document.querySelector(`.coordinate-lat[data-point="${i}"]`);
+            const lngInput = document.querySelector(`.coordinate-lng[data-point="${i}"]`);
+            
+            if (!latInput || !lngInput) {
+                console.error(`ポイント ${i} の入力フィールドが見つかりません。`);
+                throw new Error('入力フィールドの取得に失敗しました。');
             }
             
-            const [lat, lng] = input.value.split(',').map(Number);
+            const lat = Number(latInput.value);
+            const lng = Number(lngInput.value);
+            
+            console.log(`ポイント ${i}: 緯度=${lat}, 経度=${lng}`);
+            
+            if (!latInput.value || !lngInput.value) {
+                throw new Error(`ポイント ${i} の座標が入力されていません。`);
+            }
             
             if (isNaN(lat) || isNaN(lng) || 
                 lat < -90 || lat > 90 || 
