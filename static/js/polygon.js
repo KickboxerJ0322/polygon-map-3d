@@ -61,7 +61,6 @@ async function createPolygon() {
         });
         
         polygon.outerCoordinates = coordinates;
-        polygon.dataset.polygonId = polygonData.id;
         map3DElement.append(polygon);
     
     // Save to database
@@ -97,36 +96,6 @@ async function createPolygon() {
     }
 }
 
-async function deletePolygon(id) {
-    try {
-        const response = await fetch(`/api/polygons/${id}`, {
-            method: 'DELETE'
-        });
-        
-        if (response.ok) {
-            // Remove from local array
-            polygons = polygons.filter(p => p.id !== id);
-            
-            // Remove from map
-            const polygonElements = map3DElement.querySelectorAll('gmp-polygon-3d');
-            polygonElements.forEach(element => {
-                if (element.dataset.polygonId === String(id)) {
-                    element.remove();
-                }
-            });
-            
-            // Update table
-            updatePolygonTable();
-            console.log('ポリゴンが正常に削除されました。');
-        } else {
-            throw new Error('ポリゴンの削除中にエラーが発生しました。');
-        }
-    } catch (error) {
-        console.error('エラー:', error.message);
-        alert(error.message);
-    }
-}
-
 function updatePolygonTable() {
     const tbody = document.getElementById('polygon-list');
     tbody.innerHTML = '';
@@ -139,10 +108,7 @@ function updatePolygonTable() {
             <td><div style="background-color: ${polygon.fill_color}; width: 20px; height: 20px;"></div></td>
             <td><div style="background-color: ${polygon.stroke_color}; width: 20px; height: 20px;"></div></td>
             <td>
-                <div class="btn-group">
-                    <button class="btn btn-sm btn-primary" onclick="editPolygon(${polygon.id})">Edit</button>
-                    <button class="btn btn-sm btn-danger" onclick="deletePolygon(${polygon.id})">Delete</button>
-                </div>
+                <button class="btn btn-sm btn-primary" onclick="editPolygon(${polygon.id})">Edit</button>
             </td>
         `;
         tbody.appendChild(row);

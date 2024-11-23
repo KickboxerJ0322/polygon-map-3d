@@ -61,7 +61,7 @@ async function initAutocomplete() {
                 tilt: 67.5,
                 range: 500
             },
-            durationMillis: 7000
+            durationMillis: 2000
         });
         
         // ビューポートが存在する場合、ポリラインを表示
@@ -108,7 +108,6 @@ async function initAutocomplete() {
 function initRotateButton() {
     document.getElementById('rotate-camera').addEventListener('click', () => {
         const currentCenter = map3DElement.center;
-        const durationSeconds = Number(document.getElementById('rotation-duration').value) || 30;
         
         map3DElement.flyCameraAround({
             camera: {
@@ -116,14 +115,42 @@ function initRotateButton() {
                 tilt: 70,
                 range: 1000
             },
-            durationMillis: durationSeconds * 1000,
+            durationMillis: 30000,
             rounds: 1
+        });
+    });
+}
+
+function initFlyToButton() {
+    document.getElementById('fly-to').addEventListener('click', () => {
+        if (!autocomplete) return;
+        
+        const place = autocomplete.getPlace();
+        if (!place || !place.geometry) {
+            alert('移動先の場所を選択してください。');
+            return;
+        }
+        
+        const targetLocation = {
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng(),
+            altitude: 100
+        };
+        
+        map3DElement.flyCameraTo({
+            endCamera: {
+                center: targetLocation,
+                tilt: 67.5,
+                range: 200
+            },
+            durationMillis: 3000
         });
     });
 }
 
 function initControls() {
     initRotateButton();
+    initFlyToButton();
 }
 
 // グローバルスコープで関数を公開
