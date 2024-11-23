@@ -33,27 +33,38 @@ async function initMap() {
 async function initAutocomplete() {
     try {
         console.log('Places APIの初期化を開始...');
-        const { Autocomplete } = await google.maps.importLibrary("places");
-        console.log('Places APIのライブラリを読み込みました');
+        const { Autocomplete } = await google.maps.importLibrary("places").catch(error => {
+            console.error('Places APIのロードに失敗しました:', error);
+            throw error;
+        });
+        console.log('Places APIのライブラリを正常に読み込みました');
         
         const input = document.getElementById("pac-input");
         if (!input) {
             throw new Error('検索入力フィールドが見つかりません');
         }
         
-        autocomplete = new Autocomplete(input, {
-            fields: ["geometry", "name", "place_id"],
-        });
-        console.log('Autocompleteを初期化しました');
+        try {
+            autocomplete = new Autocomplete(input, {
+                fields: ["geometry", "name", "place_id"],
+            });
+            console.log('Autocompleteを正常に初期化しました');
+        } catch (error) {
+            console.error('Autocompleteの初期化に失敗しました:', error);
+            throw error;
+        }
         
         autocomplete.addListener("place_changed", async () => {
-            console.log('場所が選択されました');
-            const place = autocomplete.getPlace();
-            if (!place.geometry) {
-                console.error('選択された場所の位置情報が取得できません:', place);
-                alert("場所が見つかりませんでした: " + place.name);
-                return;
-            }
+            console.log('場所の選択イベントが発生しました');
+            try {
+                const place = autocomplete.getPlace();
+                console.log('選択された場所の情報:', place);
+                
+                if (!place.geometry) {
+                    console.error('場所の位置情報が取得できません:', place);
+                    alert("場所が見つかりませんでした: " + place.name);
+                    return;
+                }
         
         const location = place.geometry.location;
         const viewport = place.geometry.viewport;

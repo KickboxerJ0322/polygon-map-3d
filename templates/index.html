@@ -145,6 +145,11 @@
       v: "alpha",
       libraries: ["places", "maps3d"]
     });
+    console.log('Google Maps APIの読み込みを開始しました');
+    window.onerror = function(msg, url, line) {
+        console.error('JavaScript エラー:', msg, 'URL:', url, 'Line:', line);
+        return false;
+    };
     </script>
     <script src="/static/js/map.js"></script>
     <script src="/static/js/polygon.js"></script>
