@@ -79,7 +79,9 @@ def handle_polygon(id):
             polygon.coordinates = data.get('coordinates', polygon.coordinates)
             polygon.height = data.get('height', polygon.height)
             polygon.fill_color = data.get('fill_color', polygon.fill_color)
+            polygon.fill_opacity = data.get('fill_opacity', polygon.fill_opacity)
             polygon.stroke_color = data.get('stroke_color', polygon.stroke_color)
+            polygon.stroke_opacity = data.get('stroke_opacity', polygon.stroke_opacity)
             polygon.stroke_width = data.get('stroke_width', polygon.stroke_width)
             
             db.session.commit()

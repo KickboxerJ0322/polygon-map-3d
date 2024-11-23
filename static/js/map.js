@@ -5,15 +5,21 @@ async function initMap() {
     try {
         console.log('Starting map initialization...');
         
+        // First, wait for the Maps JavaScript API to load
+        await new Promise((resolve) => {
+            if (window.google && window.google.maps) {
+                resolve();
+            } else {
+                window.initCallback = resolve;
+            }
+        });
+
         // Import required libraries first
         const [{ Map3DElement }, { Autocomplete }, { ElevationService }] = await Promise.all([
             google.maps.importLibrary("maps3d"),
             google.maps.importLibrary("places"),
             google.maps.importLibrary("elevation")
         ]);
-        
-        // Wait for custom element to be defined
-        await customElements.whenDefined('gmp-map-3d');
         
         // Create new map instance
         map3DElement = new Map3DElement({
