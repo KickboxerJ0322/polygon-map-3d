@@ -1,9 +1,14 @@
 let polygons = [];
 
 async function createPolygon() {
+    console.log('createPolygon関数が呼び出されました');
     try {
+        console.log('ポリゴン作成処理を開始します...');
+        
         // gmp-polygon-3dカスタム要素を作成
+        console.log('gmp-polygon-3dカスタム要素を作成中...');
         const polygon = document.createElement('gmp-polygon-3d');
+        console.log('カスタム要素が作成されました');
         
         // Validate inputs
         const coordinates = [];
@@ -73,10 +78,14 @@ async function createPolygon() {
         polygon.outerCoordinates = coordinates;
         map3DElement.append(polygon);
     
+    console.log('ポリゴンの描画が完了しました。データベースへの保存を開始します...');
+    
     // Save to database
+    console.log('透明度の設定を取得中...');
     const fillOpacity = Number(document.getElementById('fill-opacity').value) / 100;
     const strokeOpacity = Number(document.getElementById('stroke-opacity').value) / 100;
     
+    console.log('ポリゴンデータを準備中...');
     const polygonData = {
         name: `Polygon ${polygons.length + 1}`,
         coordinates: coordinates,
@@ -171,7 +180,21 @@ function hexToRGBA(hex, opacity) {
     return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 }
 
-document.getElementById('create-polygon').addEventListener('click', createPolygon);
+// DOMContentLoadedイベント内でイベントリスナーを登録
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('ポリゴン作成機能の初期化を開始します...');
+    const createPolygonButton = document.getElementById('create-polygon');
+    
+    if (createPolygonButton) {
+        console.log('create-polygonボタンが見つかりました');
+        createPolygonButton.addEventListener('click', () => {
+            console.log('ポリゴン作成ボタンがクリックされました');
+            createPolygon();
+        });
+    } else {
+        console.error('create-polygonボタンが見つかりません');
+    }
+});
 async function deletePolygon(id) {
     if (!confirm('このポリゴンを削除してもよろしいですか？')) {
         return;
