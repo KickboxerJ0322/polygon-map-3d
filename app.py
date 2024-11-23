@@ -65,6 +65,19 @@ def update_polygon(id):
     db.session.commit()
     return '', 204
 
+
+@app.route('/api/polygons/<int:id>', methods=['DELETE'])
+def delete_polygon(id):
+    from models import Polygon
+    try:
+        polygon = Polygon.query.get_or_404(id)
+        db.session.delete(polygon)
+        db.session.commit()
+        return '', 204
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
 with app.app_context():
     import models
     db.create_all()

@@ -47,7 +47,7 @@ async function initAutocomplete() {
                 tilt: 67.5,
                 range: 500
             },
-            durationMillis: 2000
+            durationMillis: 7000
         });
         
         // ビューポートが存在する場合、ポリラインを表示
@@ -92,8 +92,9 @@ async function initAutocomplete() {
 }
 
 function initRotateButton() {
-    document.getElementById('rotate-camera').addEventListener('click', () => {
+    document.getElementById('around').addEventListener('click', () => {
         const currentCenter = map3DElement.center;
+        const durationSeconds = Number(document.getElementById('rotation-duration').value) || 30;
         
         map3DElement.flyCameraAround({
             camera: {
@@ -101,7 +102,7 @@ function initRotateButton() {
                 tilt: 70,
                 range: 1000
             },
-            durationMillis: 30000,
+            durationMillis: durationSeconds * 1000,
             rounds: 1
         });
     });

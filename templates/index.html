@@ -16,7 +16,12 @@
                         <input type="text" id="pac-input" class="form-control" placeholder="Navigate to a place">
                     </div>
                     
-                    <button id="rotate-camera" class="btn btn-secondary mb-2">Rotate Camera</button>
+                    <div class="d-flex gap-2 align-items-center mb-2">
+                        <button id="around" class="btn btn-secondary">Around</button>
+                        <div class="flex-grow-1">
+                            <input type="number" id="rotation-duration" class="form-control" value="30" min="1" max="120">
+                        </div>
+                    </div>
                     <button id="fly-to" class="btn btn-secondary mb-3">Fly To Location</button>
                     
                     <h5>Polygon Points</h5>
@@ -93,15 +98,27 @@
                     
                     <div class="height-control mb-3">
                         <label>Height (meters)</label>
-                        <input type="number" id="height-input" class="form-control" value="1000">
+                        <input type="number" id="height-input" class="form-control" value="300">
                     </div>
                     
                     <div class="style-controls mb-3">
                         <label>Fill Color</label>
-                        <input type="color" id="fill-color" class="form-control" value="#ff0000">
+                        <div class="d-flex gap-2 mb-2">
+                            <input type="color" id="fill-color" class="form-control" value="#ff0000">
+                            <div class="flex-grow-1">
+                                <label class="form-label">Opacity</label>
+                                <input type="range" id="fill-opacity" class="form-range" min="0" max="100" value="50">
+                            </div>
+                        </div>
                         
                         <label>Stroke Color</label>
-                        <input type="color" id="stroke-color" class="form-control" value="#0000ff">
+                        <div class="d-flex gap-2 mb-2">
+                            <input type="color" id="stroke-color" class="form-control" value="#0000ff">
+                            <div class="flex-grow-1">
+                                <label class="form-label">Opacity</label>
+                                <input type="range" id="stroke-opacity" class="form-range" min="0" max="100" value="100">
+                            </div>
+                        </div>
                         
                         <label>Stroke Width</label>
                         <input type="number" id="stroke-width" class="form-control" value="8">

@@ -110,7 +110,8 @@ function updatePolygonTable() {
             <td><div style="background-color: ${polygon.fill_color}; width: 20px; height: 20px;"></div></td>
             <td><div style="background-color: ${polygon.stroke_color}; width: 20px; height: 20px;"></div></td>
             <td>
-                <button class="btn btn-sm btn-primary" onclick="editPolygon(${polygon.id})">Edit</button>
+                <button class="btn btn-sm btn-primary me-2" onclick="editPolygon(${polygon.id})">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="deletePolygon(${polygon.id})">Delete</button>
             </td>
         `;
         tbody.appendChild(row);
@@ -141,4 +142,33 @@ async function loadPolygons() {
 }
 
 document.getElementById('create-polygon').addEventListener('click', createPolygon);
+async function deletePolygon(id) {
+    if (!confirm('このポリゴンを削除してもよろしいですか？')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/polygons/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            // Remove polygon from the array
+            polygons = polygons.filter(p => p.id !== id);
+            // Update the table
+            updatePolygonTable();
+            // Remove the polygon from the map
+            const existingPolygon = map3DElement.querySelector(`gmp-polygon-3d[data-id="${id}"]`);
+            if (existingPolygon) {
+                existingPolygon.remove();
+            }
+            console.log('ポリゴンが正常に削除されました。');
+        } else {
+            throw new Error('ポリゴンの削除中にエラーが発生しました。');
+        }
+    } catch (error) {
+        console.error('エラー:', error.message);
+        alert(error.message);
+    }
+}
 window.addEventListener('load', loadPolygons);
