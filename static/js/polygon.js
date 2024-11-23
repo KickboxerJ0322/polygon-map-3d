@@ -1,24 +1,7 @@
 let polygons = [];
 
-// HEX色コードをRGBA文字列に変換する関数
-function hexToRgba(hex, opacity = 1) {
-    try {
-        // HEXコードから各色成分を抽出
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
-        
-        // RGBA文字列を生成して返す
-        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-    } catch (error) {
-        console.error('HEX色コードの変換中にエラーが発生しました:', error);
-        return hex; // エラーが発生した場合は元のHEX色コードを返す
-    }
-}
-
 async function createPolygon() {
     try {
-        console.log('ポリゴンの作成を開始します...');
         // gmp-polygon-3dカスタム要素を作成
         const polygon = document.createElement('gmp-polygon-3d');
         
@@ -70,23 +53,10 @@ async function createPolygon() {
             strokeColor: document.getElementById('stroke-color').value
         });
         
-        // 色と透明度の取得
-        const fillColor = document.getElementById('fill-color').value;
-        const fillOpacity = document.getElementById('fill-opacity').value;
-        const strokeColor = document.getElementById('stroke-color').value;
-        const strokeOpacity = document.getElementById('stroke-opacity').value;
-
-        console.log('色設定:', {
-            fillColor,
-            fillOpacity,
-            strokeColor,
-            strokeOpacity
-        });
-
         // ポリゴンの属性を設定
         polygon.setAttribute('altitude-mode', 'relative-to-ground');
-        polygon.setAttribute('fill-color', hexToRgba(fillColor, fillOpacity));
-        polygon.setAttribute('stroke-color', hexToRgba(strokeColor, strokeOpacity));
+        polygon.setAttribute('fill-color', document.getElementById('fill-color').value);
+        polygon.setAttribute('stroke-color', document.getElementById('stroke-color').value);
         polygon.setAttribute('stroke-width', document.getElementById('stroke-width').value);
         polygon.setAttribute('extruded', 'true');
         

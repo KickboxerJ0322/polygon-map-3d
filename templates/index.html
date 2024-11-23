@@ -16,7 +16,8 @@
                         <input type="text" id="pac-input" class="form-control" placeholder="Navigate to a place">
                     </div>
                     
-                    <button id="rotate-camera" class="btn btn-secondary mb-3">Rotate Camera</button>
+                    <button id="rotate-camera" class="btn btn-secondary mb-2">Rotate Camera</button>
+                    <button id="fly-to" class="btn btn-secondary mb-3">Fly To Location</button>
                     
                     <h5>Polygon Points</h5>
                     <div id="point-controls">
@@ -97,26 +98,10 @@
                     
                     <div class="style-controls mb-3">
                         <label>Fill Color</label>
-                        <div class="row g-2 mb-2">
-                            <div class="col-6">
-                                <input type="color" id="fill-color" class="form-control" value="#ff0000">
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label">透明度</label>
-                                <input type="range" id="fill-opacity" class="form-range" min="0" max="1" step="0.1" value="0.5">
-                            </div>
-                        </div>
+                        <input type="color" id="fill-color" class="form-control" value="#ff0000">
                         
                         <label>Stroke Color</label>
-                        <div class="row g-2 mb-2">
-                            <div class="col-6">
-                                <input type="color" id="stroke-color" class="form-control" value="#0000ff">
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label">透明度</label>
-                                <input type="range" id="stroke-opacity" class="form-range" min="0" max="1" step="0.1" value="0.5">
-                            </div>
-                        </div>
+                        <input type="color" id="stroke-color" class="form-control" value="#0000ff">
                         
                         <label>Stroke Width</label>
                         <input type="number" id="stroke-width" class="form-control" value="8">
@@ -154,14 +139,8 @@
         </div>
     </div>
 
-    <script>
-      (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
-        key: "AIzaSyB_RFfb6jvVCyKHHR1Gq1xUeyfYgqFcltY",
-        v: "alpha"
-      });
-    </script>
-    <script>
-      window.addEventListener('load', initMap);
+    <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB_RFfb6jvVCyKHHR1Gq1xUeyfYgqFcltY&v=alpha&callback=initMap&libraries=maps3d,places">
     </script>
     <script src="/static/js/map.js"></script>
     <script src="/static/js/polygon.js"></script>

@@ -143,22 +143,19 @@ function initControls() {
 async function initMap() {
     try {
         console.log('Starting map initialization...');
-        const { Map3DElement } = await google.maps.importLibrary("maps3d");
         const { Autocomplete } = await google.maps.importLibrary("places");
         
-        // 既存のmap要素を取得して置き換える
-        const mapContainer = document.getElementById('map');
-        map3DElement = new Map3DElement({
-            center: { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 },
-            heading: 30,
-            tilt: 70,
-            range: 1000
-        });
-        
-        mapContainer.replaceWith(map3DElement);
+        // gmp-map-3dカスタム要素を取得
+        map3DElement = document.querySelector('gmp-map-3d');
         
         // カスタム要素が定義されるのを待つ
         await customElements.whenDefined(map3DElement.localName);
+        
+        // 地図の初期設定
+        map3DElement.center = { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 };
+        map3DElement.heading = 30;
+        map3DElement.tilt = 70;
+        map3DElement.range = 1000;
         
         await initAutocomplete();
         initControls();
@@ -168,8 +165,6 @@ async function initMap() {
         console.error(error.stack);
     }
 }
-
-// グローバルスコープでの関数定義を削除（重複を避けるため）
 
 // グローバルスコープで関数を公開
 window.initMap = initMap;
