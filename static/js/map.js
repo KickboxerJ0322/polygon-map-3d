@@ -203,7 +203,7 @@ function initControls() {
                 range: map3DElement.range
             };
             
-            const durationSeconds = Number(document.getElementById('rotation-duration').value) || 30;
+            const durationSeconds = Number(document.getElementById('rotation-duration').value) || 5;
             
             map3DElement.flyCameraAround({
                 camera: currentCamera,
