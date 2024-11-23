@@ -131,7 +131,7 @@ function updatePolygonTable() {
             <td><div style="background-color: ${polygon.fill_color}; width: 20px; height: 20px;"></div></td>
             <td><div style="background-color: ${polygon.stroke_color}; width: 20px; height: 20px;"></div></td>
             <td>
-                <button class="btn btn-sm btn-primary me-2" onclick="editPolygon(${polygon.id})">Edit</button>
+                <button class="btn btn-sm btn-primary me-2" onclick="editPolygon(${polygon.id})">Copy</button>
                 <button class="btn btn-sm btn-danger" onclick="deletePolygon(${polygon.id})">Delete</button>
             </td>
         `;
