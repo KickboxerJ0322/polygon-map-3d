@@ -1,0 +1,157 @@
+<html>
+  <head>
+    <title>Photorealistic 3D Maps in Maps JavaScript Places API Integration Demo</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      gmp-map-3d {
+        height: 400px;
+      }
+      .pac-controls {
+        display: inline-block;
+        padding: 0px 11px;
+      }
+      .pac-controls label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+      .pac-card {
+        background-color: #fff;
+        border: 0;
+        border-radius: 4px;
+        box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
+        margin: 10px;
+        padding: 0 0.5em;
+        font: 400 18px Roboto, Arial, sans-serif;
+        overflow: hidden;
+        font-family: Roboto;
+        padding: 0;
+        position: absolute;
+        left: 10px;
+        top: 50px;
+        z-index: 1000;
+      }
+      #pac-container {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        margin-right: 12px;
+        border-radius: 2px;
+      }
+      #pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 400px;
+      }
+      #pac-input:focus {
+        border-color: #4d90fe;
+      }
+      #title {
+        color: #fff;
+        background-color: #4d90fe;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 6px 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="pac-card" id="pac-card">
+      <div id="title">Navigate to a place</div>
+      <div id="pac-container">
+        <input class="pac-input" type="text" id="pac-input" name="pac-input" placeholder="Enter a location..." />
+      </div>
+    </div>
+    <script>
+      (g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })({
+        key: "AIzaSyB_RFfb6jvVCyKHHR1Gq1xUeyfYgqFcltY",
+          v: "alpha",
+          // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
+          // Add other bootstrap parameters as needed, using camel case.
+          });
+    </script>
+    <script>
+      let map3DElement = null;
+      async function init() {
+        const { Map3DElement } = await google.maps.importLibrary("maps3d");
+        map3DElement = new Map3DElement({
+          center: { lat: 0, lng: 0, altitude: 16000000 },
+        });
+        document.body.append(map3DElement);
+        initAutocomplete();
+      }
+      async function initAutocomplete() {
+        const { Autocomplete } = await google.maps.importLibrary("places");
+        const autocomplete = new Autocomplete(
+            document.getElementById("pac-input"),
+            {
+              fields: [
+                "geometry",
+                "name",
+                "place_id"
+              ],
+            }
+        );
+        autocomplete.addListener("place_changed", () => {
+          //viewer.entities.removeAll();
+          const place = autocomplete.getPlace();
+          if (!place.geometry || !place.geometry.viewport) {
+            window.alert("No viewport for input: " + place.name);
+            return;
+          }
+          zoomToViewport(place.geometry);
+        });
+      }
+      const zoomToViewport = async (geometry) => {
+        const { AltitudeMode, Polyline3DElement } = await google.maps.importLibrary("maps3d");
+        let viewport = geometry.viewport;
+        let locationPoints = [
+          { lat: viewport.getNorthEast().lat(), lng: viewport.getNorthEast().lng() },
+          { lat: viewport.getSouthWest().lat(), lng: viewport.getNorthEast().lng() },
+          { lat: viewport.getSouthWest().lat(), lng: viewport.getSouthWest().lng() },
+          { lat: viewport.getNorthEast().lat(), lng: viewport.getSouthWest().lng() },
+          { lat: viewport.getNorthEast().lat(), lng: viewport.getNorthEast().lng() }
+        ];
+        let locationPolyline = new Polyline3DElement({
+          altitudeMode: AltitudeMode.CLAMP_TO_GROUND,
+          strokeColor: "blue",
+          strokeWidth: 10,
+          coordinates: locationPoints,
+        });
+        map3DElement.append(locationPolyline);
+        console.log(locationPolyline);
+        let elevation = await getElevationforPoint(geometry.location);
+        if (map3DElement) {
+          map3DElement.center = { lat: geometry.location.lat(), lng: geometry.location.lng(), altitude: elevation + 50 };
+          map3DElement.heading = 0;
+          map3DElement.range = 1000;
+          map3DElement.tilt = 65;
+        }
+      };
+      async function getElevationforPoint(location) {
+        const { ElevationService } = await google.maps.importLibrary("elevation");
+        // Get place elevation using the ElevationService.
+        const elevatorService = new google.maps.ElevationService();
+        const elevationResponse = await elevatorService.getElevationForLocations({
+          locations: [location],
+        });
+        if (!(elevationResponse.results && elevationResponse.results.length)) {
+          window.alert(`Insufficient elevation data for place: ${place.name}`);
+          return;
+        }
+        const elevation = elevationResponse.results[0].elevation || 10;
+        return elevation;
+      }
+      init();
+    </script>
+  </body>
+</html>
