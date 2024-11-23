@@ -16,8 +16,11 @@
                         <input type="text" id="pac-input" class="form-control" placeholder="Navigate to a place">
                     </div>
                     
-                    <button id="rotate-camera" class="btn btn-secondary mb-2">Rotate Camera</button>
-                    <button id="fly-to" class="btn btn-secondary mb-3">Fly To Location</button>
+                    <div class="mb-3">
+                        <label>Camera Animation Duration (ms)</label>
+                        <input type="number" id="camera-duration" class="form-control mb-2" value="30000">
+                        <button id="rotate-camera" class="btn btn-secondary">Around</button>
+                    </div>
                     
                     <h5>Polygon Points</h5>
                     <div id="point-controls">
@@ -93,15 +96,29 @@
                     
                     <div class="height-control mb-3">
                         <label>Height (meters)</label>
-                        <input type="number" id="height-input" class="form-control" value="1000">
+                        <input type="number" id="height-input" class="form-control" value="300">
                     </div>
                     
                     <div class="style-controls mb-3">
                         <label>Fill Color</label>
-                        <input type="color" id="fill-color" class="form-control" value="#ff0000">
+                        <div class="row g-2 mb-2">
+                            <div class="col-8">
+                                <input type="color" id="fill-color" class="form-control" value="#ff0000">
+                            </div>
+                            <div class="col-4">
+                                <input type="range" id="fill-alpha" class="form-control" min="0" max="100" value="50">
+                            </div>
+                        </div>
                         
                         <label>Stroke Color</label>
-                        <input type="color" id="stroke-color" class="form-control" value="#0000ff">
+                        <div class="row g-2 mb-2">
+                            <div class="col-8">
+                                <input type="color" id="stroke-color" class="form-control" value="#0000ff">
+                            </div>
+                            <div class="col-4">
+                                <input type="range" id="stroke-alpha" class="form-control" min="0" max="100" value="100">
+                            </div>
+                        </div>
                         
                         <label>Stroke Width</label>
                         <input type="number" id="stroke-width" class="form-control" value="8">

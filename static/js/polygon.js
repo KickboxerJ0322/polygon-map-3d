@@ -1,5 +1,13 @@
 let polygons = [];
 
+// Helper function to convert hex color to rgba
+function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 async function createPolygon() {
     try {
         const { Polygon3DElement, AltitudeMode } = await google.maps.importLibrary("maps3d");
@@ -52,10 +60,19 @@ async function createPolygon() {
             strokeColor: document.getElementById('stroke-color').value
         });
         
+        // Convert hex colors to rgba
+        const fillColor = document.getElementById('fill-color').value;
+        const fillAlpha = document.getElementById('fill-alpha').value / 100;
+        const strokeColor = document.getElementById('stroke-color').value;
+        const strokeAlpha = document.getElementById('stroke-alpha').value / 100;
+        
+        const fillRgba = hexToRgba(fillColor, fillAlpha);
+        const strokeRgba = hexToRgba(strokeColor, strokeAlpha);
+        
         const polygon = new Polygon3DElement({
             altitudeMode: AltitudeMode.RELATIVE_TO_GROUND,
-            fillColor: document.getElementById('fill-color').value,
-            strokeColor: document.getElementById('stroke-color').value,
+            fillColor: fillRgba,
+            strokeColor: strokeRgba,
             strokeWidth: Number(document.getElementById('stroke-width').value),
             extruded: true
         });
@@ -108,7 +125,10 @@ function updatePolygonTable() {
             <td><div style="background-color: ${polygon.fill_color}; width: 20px; height: 20px;"></div></td>
             <td><div style="background-color: ${polygon.stroke_color}; width: 20px; height: 20px;"></div></td>
             <td>
-                <button class="btn btn-sm btn-primary" onclick="editPolygon(${polygon.id})">Edit</button>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-primary" onclick="editPolygon(${polygon.id})">Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deletePolygon(${polygon.id})">Delete</button>
+                </div>
             </td>
         `;
         tbody.appendChild(row);
@@ -118,6 +138,34 @@ function updatePolygonTable() {
 async function loadPolygons() {
     const response = await fetch('/api/polygons');
     if (response.ok) {
+async function deletePolygon(id) {
+    try {
+        const response = await fetch(`/api/polygons/${id}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            // Remove polygon from the array and update table
+            polygons = polygons.filter(p => p.id !== id);
+            updatePolygonTable();
+            
+            // Remove polygon from map
+            const polygonElements = map3DElement.querySelectorAll('gmp-polygon-3d');
+            polygonElements.forEach(polygon => polygon.remove());
+            
+            // Recreate remaining polygons
+            await loadPolygons();
+            
+            console.log('ポリゴンが正常に削除されました。');
+        } else {
+            throw new Error('ポリゴンの削除中にエラーが発生しました。');
+        }
+    } catch (error) {
+        console.error('エラー:', error.message);
+        alert(error.message);
+    }
+}
+
         polygons = await response.json();
         updatePolygonTable();
         
