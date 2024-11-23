@@ -2,48 +2,102 @@ let map3DElement = null;
 let autocomplete = null;
 
 async function initMap() {
+    const mapContainer = document.getElementById('map-container');
     try {
         console.log('Starting map initialization...');
+        mapContainer.innerHTML = `
+            <div class="d-flex flex-column justify-content-center align-items-center h-100">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading map...</span>
+                </div>
+                <div>Initializing 3D Map...</div>
+            </div>
+        `;
+
+        // Import required libraries with proper error handling
+        let Map3DElement, Autocomplete, ElevationService;
+        try {
+            const maps3d = await google.maps.importLibrary("maps3d");
+            const places = await google.maps.importLibrary("places");
+            const elevation = await google.maps.importLibrary("elevation");
+            
+            Map3DElement = maps3d.Map3DElement;
+            Autocomplete = places.Autocomplete;
+            ElevationService = elevation.ElevationService;
+        } catch (e) {
+            throw new Error("Failed to load required Google Maps APIs: " + e.message);
+        }
         
-        // Import required libraries first
-        const [{ Map3DElement }, { Autocomplete }, { ElevationService }] = await Promise.all([
-            google.maps.importLibrary("maps3d"),
-            google.maps.importLibrary("places"),
-            google.maps.importLibrary("elevation")
-        ]);
+        // Ensure custom element is defined
+        if (!customElements.get('gmp-map-3d')) {
+            await customElements.whenDefined('gmp-map-3d');
+        }
         
-        // Wait for custom element to be defined
-        await customElements.whenDefined('gmp-map-3d');
-        
-        // Create new map instance
+        // Create new map instance with initial view of Tokyo
         map3DElement = new Map3DElement({
-            center: { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 },
+            center: { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 100 },
             heading: 30,
-            tilt: 70,
-            range: 1000
+            tilt: 67.5,
+            range: 1000,
+            defaultLabelsDisabled: false
         });
         
-        // Replace existing map container content
-        const mapContainer = document.getElementById('map-container');
+        // Clear and append map
         mapContainer.innerHTML = '';
         mapContainer.appendChild(map3DElement);
         
-        // Initialize additional features
-        await initAutocomplete();
-        initControls();
+        // Initialize features sequentially with proper error handling
+        try {
+            await initAutocomplete();
+            await initControls();
+        } catch (e) {
+            console.warn('Feature initialization warning:', e);
+        }
         
         console.log('Map initialized successfully');
+        
+        // Add initial animation
+        map3DElement.flyCameraTo({
+            endCamera: {
+                center: { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 500 },
+                tilt: 67.5,
+                range: 2000
+            },
+            durationMillis: 2000
+        });
+
+        // Add labels toggle event listener
+        document.getElementById('labels-toggle').addEventListener('change', function(e) {
+            if (map3DElement) {
+                map3DElement.defaultLabelsDisabled = !e.target.checked;
+            }
+        });
+
     } catch (error) {
         console.error('Map initialization error:', error);
-        console.error(error.stack);
-        document.getElementById('map-container').innerHTML = `
+        mapContainer.innerHTML = `
             <div class="alert alert-danger">
-                Map initialization failed: ${error.message}
-                <button class="btn btn-primary mt-2" onclick="window.location.reload()">
-                    Retry
+                <h4 class="alert-heading">Map Initialization Failed</h4>
+                <p>${error.message}</p>
+                <hr>
+                <p class="mb-0">Please check:</p>
+                <ul>
+                    <li>Internet connection is stable</li>
+                    <li>Google Maps API key is valid and has the following APIs enabled:
+                        <ul>
+                            <li>Maps JavaScript API</li>
+                            <li>Maps 3D API</li>
+                            <li>Places API</li>
+                            <li>Elevation API</li>
+                        </ul>
+                    </li>
+                </ul>
+                <button class="btn btn-primary mt-3" onclick="window.location.reload()">
+                    <i class="fas fa-sync-alt me-2"></i>Retry Loading
                 </button>
             </div>
         `;
+        throw error;
     }
 }
 

@@ -19,7 +19,10 @@ db.init_app(app)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    maps_api_key = os.environ.get('GOOGLE_MAPS_API_KEY')
+    if not maps_api_key:
+        return "Google Maps API key is not configured", 500
+    return render_template('index.html', maps_api_key=maps_api_key)
 
 @app.route('/api/polygons', methods=['GET'])
 def get_polygons():

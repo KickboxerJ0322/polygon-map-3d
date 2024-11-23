@@ -11,7 +11,7 @@
             <!-- Control Panel -->
             <div class="col-md-3">
                 <div class="control-panel">
-                    <h4 class="mb-3">Location Controls</h4>
+                    <h4 class="mb-3">Polygon Map 3D</h4>
                     <div class="search-box mb-3">
                         <input type="text" id="pac-input" class="form-control" placeholder="Navigate to a place">
                     </div>
@@ -25,6 +25,10 @@
                     
                     
                     <h5>Polygon Points</h5>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="labels-toggle" checked>
+                        <label class="form-check-label" for="labels-toggle">Labels</label>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Polygon Name</label>
                         <input type="text" id="polygon-name" class="form-control">
@@ -130,7 +134,6 @@
                     
                     <div class="d-flex gap-2">
                         <button id="create-polygon" class="btn btn-primary">Create Polygon</button>
-                        <button id="update-polygon" class="btn btn-success" disabled>Update Polygon</button>
                         <button id="cancel-edit" class="btn btn-secondary" style="display: none;" onclick="cancelEdit()">Cancel</button>
                     </div>
                 </div>
@@ -169,11 +172,12 @@
     </div>
 
     <script>
-      (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
-        key: "AIzaSyB_RFfb6jvVCyKHHR1Gq1xUeyfYgqFcltY",
-        v: "alpha",
-        libraries: ["maps3d", "places"]
-      });
+        // Initialize Google Maps API with proper error handling
+        (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>{const mapContainer=document.getElementById('map-container');if(mapContainer){mapContainer.innerHTML='<div class="alert alert-danger">Failed to load Google Maps API. Please check your API key and internet connection.</div>';}n(Error(p+" could not load."))};a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+            key: "{{ maps_api_key }}",
+            v: "alpha",
+            libraries: ["maps3d", "places", "elevation"]
+        });
     </script>
     <script src="/static/js/map.js"></script>
     <script src="/static/js/polygon.js"></script>
