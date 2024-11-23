@@ -4,30 +4,29 @@ let autocomplete = null;
 async function initMap() {
     try {
         console.log('Starting map initialization...');
-        const { Map3DElement } = await google.maps.importLibrary("maps3d");
         
-        // Wait for custom element to be defined
-        await customElements.whenDefined('gmp-map-3d');
-        
-        // Pre-load required libraries
-        await Promise.all([
+        // Import required libraries first
+        const [{ Map3DElement }, { Autocomplete }, { ElevationService }] = await Promise.all([
+            google.maps.importLibrary("maps3d"),
             google.maps.importLibrary("places"),
             google.maps.importLibrary("elevation")
         ]);
         
-        // 地図の初期設定
-        const mapOptions = {
+        // Wait for custom element to be defined
+        await customElements.whenDefined('gmp-map-3d');
+        
+        // Create new map instance
+        map3DElement = new Map3DElement({
             center: { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 },
             heading: 30,
             tilt: 70,
             range: 1000
-        };
+        });
         
-        // Get existing map element
-        map3DElement = document.getElementById('map');
-        
-        // Set map options
-        Object.assign(map3DElement, mapOptions);
+        // Replace existing map container content
+        const mapContainer = document.getElementById('map-container');
+        mapContainer.innerHTML = '';
+        mapContainer.appendChild(map3DElement);
         
         // Initialize additional features
         await initAutocomplete();
@@ -37,7 +36,14 @@ async function initMap() {
     } catch (error) {
         console.error('Map initialization error:', error);
         console.error(error.stack);
-        alert('Map initialization failed. Please refresh the page.');
+        document.getElementById('map-container').innerHTML = `
+            <div class="alert alert-danger">
+                Map initialization failed: ${error.message}
+                <button class="btn btn-primary mt-2" onclick="window.location.reload()">
+                    Retry
+                </button>
+            </div>
+        `;
     }
 }
 
