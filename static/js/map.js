@@ -6,29 +6,38 @@ async function initMap() {
         console.log('Starting map initialization...');
         const { Map3DElement } = await google.maps.importLibrary("maps3d");
         
-        // カスタム要素の定義を待つ
+        // Wait for custom element to be defined
         await customElements.whenDefined('gmp-map-3d');
         
-        // 既存の要素を取得または新規作成
-        map3DElement = document.querySelector('gmp-map-3d');
-        if (!map3DElement) {
-            map3DElement = new Map3DElement();
-            document.getElementById('map-container').appendChild(map3DElement);
-        }
+        // Pre-load required libraries
+        await Promise.all([
+            google.maps.importLibrary("places"),
+            google.maps.importLibrary("elevation")
+        ]);
         
         // 地図の初期設定
-        map3DElement.center = { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 };
-        map3DElement.heading = 30;
-        map3DElement.tilt = 70;
-        map3DElement.range = 1000;
+        const mapOptions = {
+            center: { lat: 35.6539047014202, lng: 139.7638538324872, altitude: 0 },
+            heading: 30,
+            tilt: 70,
+            range: 1000
+        };
         
+        // Get existing map element
+        map3DElement = document.getElementById('map');
+        
+        // Set map options
+        Object.assign(map3DElement, mapOptions);
+        
+        // Initialize additional features
         await initAutocomplete();
         initControls();
+        
         console.log('Map initialized successfully');
     } catch (error) {
         console.error('Map initialization error:', error);
         console.error(error.stack);
-        alert('地図の初期化中にエラーが発生しました。ページを更新してください。');
+        alert('Map initialization failed. Please refresh the page.');
     }
 }
 

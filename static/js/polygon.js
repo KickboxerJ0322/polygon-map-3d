@@ -186,4 +186,158 @@ async function deletePolygon(id) {
         alert(error.message);
     }
 }
+let currentEditingId = null;
+
+async function editPolygon(id) {
+    try {
+        // 編集中のポリゴンIDを保存
+        currentEditingId = id;
+        
+        // 該当するポリゴンを取得
+        const polygon = polygons.find(p => p.id === id);
+        if (!polygon) {
+            throw new Error('ポリゴンが見つかりません。');
+        }
+        
+        // フォームに値を設定
+        polygon.coordinates.forEach((coord, index) => {
+            const latInput = document.querySelector(`.coordinate-lat[data-point="${index + 1}"]`);
+            const lngInput = document.querySelector(`.coordinate-lng[data-point="${index + 1}"]`);
+            
+            if (latInput && lngInput) {
+                latInput.value = coord.lat;
+                lngInput.value = coord.lng;
+            }
+        });
+        
+        document.getElementById('height-input').value = polygon.height;
+        document.getElementById('fill-color').value = polygon.fill_color;
+        document.getElementById('stroke-color').value = polygon.stroke_color;
+        document.getElementById('stroke-width').value = polygon.stroke_width;
+        
+        // 既存のポリゴンを地図から一時的に非表示
+        const existingPolygon = map3DElement.querySelector(`gmp-polygon-3d[data-id="${id}"]`);
+        if (existingPolygon) {
+            existingPolygon.style.display = 'none';
+        }
+        
+        // ボタンの状態を更新
+        document.getElementById('create-polygon').disabled = true;
+        document.getElementById('update-polygon').disabled = false;
+        document.getElementById('cancel-edit').style.display = 'inline-block';
+        
+    } catch (error) {
+        console.error('エラー:', error.message);
+        alert(error.message);
+    }
+}
+
+async function updatePolygon() {
+    try {
+        if (!currentEditingId) {
+            throw new Error('編集中のポリゴンがありません。');
+        }
+        
+        // 入力値の検証
+        const coordinates = [];
+        for (let i = 1; i <= 4; i++) {
+            const latInput = document.querySelector(`.coordinate-lat[data-point="${i}"]`);
+            const lngInput = document.querySelector(`.coordinate-lng[data-point="${i}"]`);
+            
+            if (!latInput || !lngInput) {
+                throw new Error(`ポイント ${i} の入力フィールドが見つかりません。`);
+            }
+            
+            const lat = Number(latInput.value);
+            const lng = Number(lngInput.value);
+            
+            if (!latInput.value || !lngInput.value) {
+                throw new Error(`ポイント ${i} の座標が入力されていません。`);
+            }
+            
+            if (isNaN(lat) || isNaN(lng) || 
+                lat < -90 || lat > 90 || 
+                lng < -180 || lng > 180) {
+                throw new Error(`ポイント ${i} の座標が無効です。緯度は -90 から 90、経度は -180 から 180 の間である必要があります。`);
+            }
+            
+            coordinates.push({
+                lat,
+                lng,
+                altitude: Number(document.getElementById('height-input').value) || 0
+            });
+        }
+        
+        const height = Number(document.getElementById('height-input').value);
+        if (isNaN(height) || height < 0) {
+            throw new Error('高さは0以上の数値を入力してください。');
+        }
+        
+        // ポリゴンデータの作成
+        const polygonData = {
+            name: `Polygon ${currentEditingId}`,
+            coordinates: coordinates,
+            height: height,
+            fill_color: document.getElementById('fill-color').value,
+            stroke_color: document.getElementById('stroke-color').value,
+            stroke_width: Number(document.getElementById('stroke-width').value)
+        };
+        
+        // サーバーに更新リクエストを送信
+        const response = await fetch(`/api/polygons/${currentEditingId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(polygonData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('ポリゴンの更新に失敗しました。');
+        }
+        
+        // ローカルのポリゴンデータを更新
+        const index = polygons.findIndex(p => p.id === currentEditingId);
+        if (index !== -1) {
+            polygons[index] = { ...polygonData, id: currentEditingId };
+        }
+        
+        // UIを更新
+        updatePolygonTable();
+        await loadPolygons(); // 地図上のポリゴンを再描画
+        
+        // 編集モードを終了
+        cancelEdit();
+        
+        console.log('ポリゴンが正常に更新されました。');
+        alert('ポリゴンを更新しました。');
+        
+    } catch (error) {
+        console.error('エラー:', error.message);
+        alert(error.message);
+    }
+}
+
+function cancelEdit() {
+    currentEditingId = null;
+    document.getElementById('create-polygon').disabled = false;
+    document.getElementById('update-polygon').disabled = true;
+    document.getElementById('cancel-edit').style.display = 'none';
+    
+    // フォームをリセット
+    document.querySelectorAll('.coordinate-lat, .coordinate-lng').forEach(input => {
+        input.value = '';
+    });
+    document.getElementById('height-input').value = '300';
+    document.getElementById('fill-color').value = '#ff0000';
+    document.getElementById('stroke-color').value = '#0000ff';
+    document.getElementById('stroke-width').value = '3';
+    
+    // 非表示のポリゴンを再表示
+    const hiddenPolygon = map3DElement.querySelector('gmp-polygon-3d[style*="display: none"]');
+    if (hiddenPolygon) {
+        hiddenPolygon.style.display = '';
+    }
+}
+
 window.addEventListener('load', loadPolygons);

@@ -66,17 +66,36 @@ def update_polygon(id):
     return '', 204
 
 
-@app.route('/api/polygons/<int:id>', methods=['DELETE'])
-def delete_polygon(id):
+@app.route('/api/polygons/<int:id>', methods=['DELETE', 'PUT'])
+def handle_polygon(id):
     from models import Polygon
-    try:
-        polygon = Polygon.query.get_or_404(id)
-        db.session.delete(polygon)
-        db.session.commit()
-        return '', 204
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+    if request.method == 'PUT':
+        try:
+            polygon = Polygon.query.get_or_404(id)
+            data = request.json
+            
+            # Update polygon attributes
+            polygon.name = data.get('name', polygon.name)
+            polygon.coordinates = data.get('coordinates', polygon.coordinates)
+            polygon.height = data.get('height', polygon.height)
+            polygon.fill_color = data.get('fill_color', polygon.fill_color)
+            polygon.stroke_color = data.get('stroke_color', polygon.stroke_color)
+            polygon.stroke_width = data.get('stroke_width', polygon.stroke_width)
+            
+            db.session.commit()
+            return jsonify(id=polygon.id), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+    elif request.method == 'DELETE':
+        try:
+            polygon = Polygon.query.get_or_404(id)
+            db.session.delete(polygon)
+            db.session.commit()
+            return '', 204
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
 
 with app.app_context():
     import models
