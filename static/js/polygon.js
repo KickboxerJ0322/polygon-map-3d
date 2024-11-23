@@ -272,6 +272,12 @@ async function updatePolygon() {
         if (isNaN(height) || height < 0) {
             throw new Error('高さは0以上の数値を入力してください。');
         }
+
+        // 透明度の取得と適用
+        const fillOpacity = document.getElementById('fill-opacity').value / 100;
+        const strokeOpacity = document.getElementById('stroke-opacity').value / 100;
+        const fillColor = hexToRGBA(document.getElementById('fill-color').value, fillOpacity);
+        const strokeColor = hexToRGBA(document.getElementById('stroke-color').value, strokeOpacity);
         
         // ポリゴンデータの作成
         const polygonData = {
@@ -283,6 +289,12 @@ async function updatePolygon() {
             stroke_width: Number(document.getElementById('stroke-width').value)
         };
         
+        // 既存のポリゴンを削除
+        const existingPolygon = map3DElement.querySelector(`gmp-polygon-3d[data-id="${currentEditingId}"]`);
+        if (existingPolygon) {
+            existingPolygon.remove();
+        }
+
         // サーバーに更新リクエストを送信
         const response = await fetch(`/api/polygons/${currentEditingId}`, {
             method: 'PUT',
@@ -302,9 +314,21 @@ async function updatePolygon() {
             polygons[index] = { ...polygonData, id: currentEditingId };
         }
         
+        // 新しいポリゴンを作成して追加
+        const { Polygon3DElement, AltitudeMode } = await google.maps.importLibrary("maps3d");
+        const newPolygon = new Polygon3DElement({
+            altitudeMode: AltitudeMode.RELATIVE_TO_GROUND,
+            fillColor: fillColor,
+            strokeColor: strokeColor,
+            strokeWidth: polygonData.stroke_width,
+            extruded: true
+        });
+        newPolygon.setAttribute('data-id', currentEditingId);
+        newPolygon.outerCoordinates = coordinates;
+        map3DElement.append(newPolygon);
+        
         // UIを更新
         updatePolygonTable();
-        await loadPolygons(); // 地図上のポリゴンを再描画
         
         // 編集モードを終了
         cancelEdit();
