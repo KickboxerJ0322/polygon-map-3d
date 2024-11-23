@@ -93,15 +93,16 @@ async function initAutocomplete() {
 
 function initRotateButton() {
     document.getElementById('around').addEventListener('click', () => {
-        const currentCenter = map3DElement.center;
+        const currentCamera = {
+            center: map3DElement.center,
+            tilt: map3DElement.tilt,
+            range: map3DElement.range
+        };
+        
         const durationSeconds = Number(document.getElementById('rotation-duration').value) || 30;
         
         map3DElement.flyCameraAround({
-            camera: {
-                center: currentCenter,
-                tilt: 70,
-                range: 1000
-            },
+            camera: currentCamera,
             durationMillis: durationSeconds * 1000,
             rounds: 1
         });

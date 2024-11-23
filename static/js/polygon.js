@@ -141,6 +141,13 @@ async function loadPolygons() {
     }
 }
 
+function hexToRGBA(hex, opacity) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+}
+
 document.getElementById('create-polygon').addEventListener('click', createPolygon);
 async function deletePolygon(id) {
     if (!confirm('このポリゴンを削除してもよろしいですか？')) {
