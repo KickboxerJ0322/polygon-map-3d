@@ -142,13 +142,16 @@ async function loadPolygons() {
         const { Polygon3DElement, AltitudeMode } = await google.maps.importLibrary("maps3d");
         
         polygons.forEach(polygonData => {
+            const fillColor = hexToRGBA(polygonData.fill_color, polygonData.fill_opacity);
+            const strokeColor = hexToRGBA(polygonData.stroke_color, polygonData.stroke_opacity);
             const polygon = new Polygon3DElement({
                 altitudeMode: AltitudeMode.RELATIVE_TO_GROUND,
-                fillColor: hexToRGBA(polygonData.fill_color, polygonData.fill_opacity),
-                strokeColor: hexToRGBA(polygonData.stroke_color, polygonData.stroke_opacity),
+                fillColor: fillColor,
+                strokeColor: strokeColor,
                 strokeWidth: polygonData.stroke_width,
                 extruded: true
             });
+            polygon.setAttribute('data-id', polygonData.id);
             polygon.outerCoordinates = polygonData.coordinates;
             map3DElement.append(polygon);
         });
@@ -371,6 +374,7 @@ function cancelEdit() {
     if (hiddenPolygon) {
         hiddenPolygon.style.display = '';
     }
+document.getElementById('update-polygon').addEventListener('click', updatePolygon);
 }
 
 window.addEventListener('load', loadPolygons);

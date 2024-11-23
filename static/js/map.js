@@ -65,7 +65,10 @@ async function initAutocomplete() {
             const location = place.geometry.location;
             const viewport = place.geometry.viewport;
             
-            console.log(`場所が選択されました: ${place.name}`);
+            const placeName = place.name;
+            document.getElementById('polygon-name').value = placeName;
+            
+            console.log(`場所が選択されました: ${placeName}`);
             console.log('位置情報:', { lat: location.lat(), lng: location.lng() });
             
             // カメラを選択した場所に移動
