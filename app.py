@@ -31,7 +31,9 @@ def get_polygons():
         'coordinates': p.coordinates,
         'height': p.height,
         'fill_color': p.fill_color,
+        'fill_opacity': p.fill_opacity,
         'stroke_color': p.stroke_color,
+        'stroke_opacity': p.stroke_opacity,
         'stroke_width': p.stroke_width
     } for p in polygons])
 
@@ -39,14 +41,16 @@ def get_polygons():
 def create_polygon():
     from models import Polygon
     data = request.json
-    polygon = Polygon(
-        name=data['name'],
-        coordinates=data['coordinates'],
-        height=data['height'],
-        fill_color=data['fill_color'],
-        stroke_color=data['stroke_color'],
-        stroke_width=data['stroke_width']
-    )
+    polygon = Polygon()
+    polygon.name = data.get('name', 'Unnamed Polygon')
+    polygon.coordinates = data.get('coordinates', [])
+    polygon.height = data.get('height', 300)
+    polygon.fill_color = data.get('fill_color', '#ff0000')
+    polygon.fill_opacity = data.get('fill_opacity', 0.5)
+    polygon.stroke_color = data.get('stroke_color', '#0000ff')
+    polygon.stroke_opacity = data.get('stroke_opacity', 1.0)
+    polygon.stroke_width = data.get('stroke_width', 3)
+    
     db.session.add(polygon)
     db.session.commit()
     return jsonify({'id': polygon.id}), 201
@@ -56,12 +60,17 @@ def update_polygon(id):
     from models import Polygon
     polygon = Polygon.query.get_or_404(id)
     data = request.json
-    polygon.name = data['name']
-    polygon.coordinates = data['coordinates']
-    polygon.height = data['height']
-    polygon.fill_color = data['fill_color']
-    polygon.stroke_color = data['stroke_color']
-    polygon.stroke_width = data['stroke_width']
+    
+    # Update polygon with new values, keeping existing ones if not provided
+    polygon.name = data.get('name', polygon.name)
+    polygon.coordinates = data.get('coordinates', polygon.coordinates)
+    polygon.height = data.get('height', polygon.height)
+    polygon.fill_color = data.get('fill_color', polygon.fill_color)
+    polygon.fill_opacity = data.get('fill_opacity', polygon.fill_opacity)
+    polygon.stroke_color = data.get('stroke_color', polygon.stroke_color)
+    polygon.stroke_opacity = data.get('stroke_opacity', polygon.stroke_opacity)
+    polygon.stroke_width = data.get('stroke_width', polygon.stroke_width)
+    
     db.session.commit()
     return '', 204
 
