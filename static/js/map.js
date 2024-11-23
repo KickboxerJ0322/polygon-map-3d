@@ -109,43 +109,15 @@ function initRotateButton() {
     });
 }
 
-function initFlyToButton() {
-    document.getElementById('fly-to').addEventListener('click', () => {
-        if (!autocomplete) return;
-        
-        const place = autocomplete.getPlace();
-        if (!place || !place.geometry) {
-            alert('移動先の場所を選択してください。');
-            return;
-        }
-        
-        const targetLocation = {
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng(),
-            altitude: 100
-        };
-        
-        map3DElement.flyCameraTo({
-            endCamera: {
-                center: targetLocation,
-                tilt: 67.5,
-                range: 200
-            },
-            durationMillis: 3000
-        });
-    });
-}
-
 function initControls() {
     initRotateButton();
-    initFlyToButton();
 }
 
-// Google Maps APIのコールバック関数として実行
+// 地図の初期化
 async function initMap() {
     try {
         console.log('Starting map initialization...');
-        const { Autocomplete } = await google.maps.importLibrary("places");
+        const { Map3DElement } = await google.maps.importLibrary("maps3d");
         
         // gmp-map-3dカスタム要素を取得
         map3DElement = document.querySelector('gmp-map-3d');
@@ -168,5 +140,5 @@ async function initMap() {
     }
 }
 
-// グローバルスコープで関数を公開
-window.initMap = initMap;
+// DOMContentLoadedイベントで初期化を実行
+document.addEventListener('DOMContentLoaded', initMap);
