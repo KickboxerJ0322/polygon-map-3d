@@ -1,0 +1,34 @@
+.control-panel {
+    padding: 15px;
+    background: var(--bs-dark);
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.coordinate-input {
+    margin-bottom: 10px;
+}
+
+#map-container {
+    height: 80vh;
+    margin: 15px 0;
+}
+
+gmp-map-3d {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+}
+
+.point-input {
+    margin-bottom: 15px;
+}
+
+.style-controls input[type="color"] {
+    height: 38px;
+    padding: 2px;
+}
+
+.table {
+    margin-top: 20px;
+}
