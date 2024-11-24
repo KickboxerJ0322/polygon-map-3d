@@ -122,6 +122,9 @@ async function loadPolygons() {
         const user = firebase.auth().currentUser;
         if (!user) {
             console.warn('ユーザーが認証されていません。');
+            // 認証されていない場合はポリゴンリストをクリア
+            polygons = [];
+            updatePolygonTable();
             return;
         }
         
@@ -136,34 +139,50 @@ async function loadPolygons() {
         }
         
         polygons = await response.json();
-        updatePolygonTable();
         
-        // 地図上のポリゴンをクリア
+        // 地図上の全てのポリゴンをクリア
         const existingPolygons = map3DElement.querySelectorAll('gmp-polygon-3d');
         existingPolygons.forEach(polygon => polygon.remove());
         
-        // ポリゴンを再描画
+        // 認証されたユーザーのポリゴンのみを表示
         const { Polygon3DElement, AltitudeMode } = await google.maps.importLibrary("maps3d");
         
         polygons.forEach(polygonData => {
-            const fillColor = hexToRGBA(polygonData.fill_color, polygonData.fill_opacity);
-            const strokeColor = hexToRGBA(polygonData.stroke_color, polygonData.stroke_opacity);
-            const polygon = new Polygon3DElement({
-                altitudeMode: AltitudeMode.RELATIVE_TO_GROUND,
-                fillColor: fillColor,
-                strokeColor: strokeColor,
-                strokeWidth: polygonData.stroke_width,
-                extruded: true
-            });
-            polygon.setAttribute('data-id', polygonData.id);
-            polygon.outerCoordinates = polygonData.coordinates;
-            map3DElement.append(polygon);
+            if (polygonData.user_id === user.uid) {
+                const fillColor = hexToRGBA(polygonData.fill_color, polygonData.fill_opacity);
+                const strokeColor = hexToRGBA(polygonData.stroke_color, polygonData.stroke_opacity);
+                const polygon = new Polygon3DElement({
+                    altitudeMode: AltitudeMode.RELATIVE_TO_GROUND,
+                    fillColor: fillColor,
+                    strokeColor: strokeColor,
+                    strokeWidth: polygonData.stroke_width,
+                    extruded: true
+                });
+                polygon.setAttribute('data-id', polygonData.id);
+                polygon.outerCoordinates = polygonData.coordinates;
+                map3DElement.append(polygon);
+            }
         });
+        
+        updatePolygonTable();
     } catch (error) {
         console.error('ポリゴンの読み込みエラー:', error);
         alert('ポリゴンの読み込み中にエラーが発生しました。');
     }
 }
+
+// Firebase認証状態の変更時にポリゴンを再読み込み
+firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+        loadPolygons();
+    } else {
+        // ユーザーがログアウトした場合、ポリゴンリストをクリア
+        polygons = [];
+        updatePolygonTable();
+        const existingPolygons = map3DElement.querySelectorAll('gmp-polygon-3d');
+        existingPolygons.forEach(polygon => polygon.remove());
+    }
+});
 
 function hexToRGBA(hex, opacity) {
     const r = parseInt(hex.slice(1, 3), 16);
