@@ -9,32 +9,24 @@ let polygons = [];
 
 async function createPolygon() {
     try {
-        // ユーザー認証チェックを最初に行う
+        // ユーザー認証チェック
         const user = firebase.auth().currentUser;
         if (!user) {
             throw new Error('ユーザー認証が必要です。');
         }
 
-        // gmp-polygon-3dカスタム要素を作成
-        const polygon = document.createElement('gmp-polygon-3d');
-        
-        // Validate inputs
+        // 座標の検証と収集
         const coordinates = [];
-        console.log('座標の検証を開始します...');
-        
         for (let i = 1; i <= 4; i++) {
             const latInput = document.querySelector(`.coordinate-lat[data-point="${i}"]`);
             const lngInput = document.querySelector(`.coordinate-lng[data-point="${i}"]`);
             
             if (!latInput || !lngInput) {
-                console.error(`ポイント ${i} の入力フィールドが見つかりません。`);
-                throw new Error('入力フィールドの取得に失敗しました。');
+                throw new Error(`ポイント ${i} の入力フィールドが見つかりません。`);
             }
             
             const lat = Number(latInput.value);
             const lng = Number(lngInput.value);
-            
-            console.log(`ポイント ${i}: 緯度=${lat}, 経度=${lng}`);
             
             if (!latInput.value || !lngInput.value) {
                 throw new Error(`ポイント ${i} の座標が入力されていません。`);
@@ -43,7 +35,7 @@ async function createPolygon() {
             if (isNaN(lat) || isNaN(lng) || 
                 lat < -90 || lat > 90 || 
                 lng < -180 || lng > 180) {
-                throw new Error(`ポイント ${i + 1} の座標が無効です。緯度は -90 から 90、経度は -180 から 180 の間である必要があります。`);
+                throw new Error(`ポイント ${i} の座標が無効です。緯度は -90 から 90、経度は -180 から 180 の間である必要があります。`);
             }
             
             coordinates.push({
@@ -52,79 +44,53 @@ async function createPolygon() {
                 altitude: Number(document.getElementById('height-input').value) || 0
             });
         }
-        
-        // Validate height
-        const height = Number(document.getElementById('height-input').value);
-        if (isNaN(height) || height < 0) {
-            throw new Error('高さは0以上の数値を入力してください。');
-        }
-        
-        console.log('ポリゴンを作成中:', {
-            coordinates,
-            height,
-            fillColor: document.getElementById('fill-color').value,
-            strokeColor: document.getElementById('stroke-color').value
+
+        // ポリゴンデータの作成
+        const polygonData = {
+            name: document.getElementById('polygon-name').value || `Polygon ${polygons.length + 1}`,
+            coordinates: coordinates,
+            height: Number(document.getElementById('height-input').value),
+            fill_color: document.getElementById('fill-color').value,
+            fill_opacity: Number(document.getElementById('fill-opacity').value) / 100,
+            stroke_color: document.getElementById('stroke-color').value,
+            stroke_opacity: Number(document.getElementById('stroke-opacity').value) / 100,
+            stroke_width: Number(document.getElementById('stroke-width').value)
+        };
+
+        // APIリクエストにユーザーIDを含める
+        const response = await fetch('/api/polygons', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Firebase-UserId': user.uid
+            },
+            body: JSON.stringify(polygonData)
         });
-        
-        // 透明度の取得
-        const fillOpacity = document.getElementById('fill-opacity').value / 100;
-        const strokeOpacity = document.getElementById('stroke-opacity').value / 100;
-        
-        // 色と透明度を設定
-        const fillColor = hexToRGBA(document.getElementById('fill-color').value, fillOpacity);
-        const strokeColor = hexToRGBA(document.getElementById('stroke-color').value, strokeOpacity);
-        
-        // ポリゴンの属性を設定
-        polygon.setAttribute('altitude-mode', 'relative-to-ground');
-        polygon.setAttribute('fill-color', fillColor);
-        polygon.setAttribute('stroke-color', strokeColor);
-        polygon.setAttribute('stroke-width', document.getElementById('stroke-width').value);
-        polygon.setAttribute('extruded', 'true');
-        
-        // カスタム要素が定義されるのを待つ
-        await customElements.whenDefined(polygon.localName);
-        polygon.outerCoordinates = coordinates;
-        map3DElement.append(polygon);
-    
-    // Set default name if empty
-    const placeName = document.getElementById('pac-input').value || `Polygon ${polygons.length + 1}`;
-    document.getElementById('polygon-name').value = placeName;
-    
-    // Save to database
-    const polygonData = {
-        name: document.getElementById('polygon-name').value,
-        coordinates: coordinates,
-        height: Number(document.getElementById('height-input').value),
-        fill_color: document.getElementById('fill-color').value,
-        fill_opacity: Number(document.getElementById('fill-opacity').value) / 100,
-        stroke_color: document.getElementById('stroke-color').value,
-        stroke_opacity: Number(document.getElementById('stroke-opacity').value) / 100,
-        stroke_width: Number(document.getElementById('stroke-width').value)
-    };
-    
-    const user = firebase.auth().currentUser;
-    if (!user) {
-        throw new Error('ユーザー認証が必要です。');
-    }
-    
-    const response = await fetch('/api/polygons', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Firebase-UserId': user.uid
-        },
-        body: JSON.stringify(polygonData)
-    });
-    
-    if (response.ok) {
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'ポリゴンの保存中にエラーが発生しました。');
+        }
+
         const result = await response.json();
         polygonData.id = result.id;
         polygons.push(polygonData);
+
+        // 3Dポリゴンを地図に追加
+        const { Polygon3DElement, AltitudeMode } = await google.maps.importLibrary("maps3d");
+        const polygon = new Polygon3DElement({
+            altitudeMode: AltitudeMode.RELATIVE_TO_GROUND,
+            fillColor: hexToRGBA(polygonData.fill_color, polygonData.fill_opacity),
+            strokeColor: hexToRGBA(polygonData.stroke_color, polygonData.stroke_opacity),
+            strokeWidth: polygonData.stroke_width,
+            extruded: true
+        });
+        polygon.setAttribute('data-id', result.id);
+        polygon.outerCoordinates = coordinates;
+        map3DElement.append(polygon);
+
         updatePolygonTable();
-        console.log('ポリゴンが正常に保存されました。');
-    } else {
-        throw new Error('ポリゴンの保存中にエラーが発生しました。');
-    }
+        console.log('ポリゴンが正常に作成されました。');
     } catch (error) {
         console.error('エラー:', error.message);
         alert(error.message);
