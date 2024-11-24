@@ -195,8 +195,16 @@ async function deletePolygon(id) {
     }
 
     try {
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            throw new Error('ユーザー認証が必要です。');
+        }
+
         const response = await fetch(`/api/polygons/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'X-Firebase-UserId': user.uid
+            }
         });
 
         if (response.ok) {
@@ -211,12 +219,14 @@ async function deletePolygon(id) {
             }
             console.log('ポリゴンが正常に削除されました。');
         } else {
-            throw new Error('ポリゴンの削除中にエラーが発生しました。');
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'ポリゴンの削除中にエラーが発生しました。');
         }
     } catch (error) {
         console.error('エラー:', error.message);
         alert(error.message);
     }
+}
 }
 let currentEditingId = null;
 

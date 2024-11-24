@@ -116,7 +116,17 @@ def handle_polygon(id):
             return jsonify({'error': str(e)}), 500
     elif request.method == 'DELETE':
         try:
+            # ユーザー認証チェック
+            user_id = request.headers.get('X-Firebase-UserId')
+            if not user_id:
+                return jsonify({'error': 'Authentication required'}), 401
+                
             polygon = Polygon.query.get_or_404(id)
+            
+            # ポリゴンの所有者チェック
+            if polygon.user_id != user_id:
+                return jsonify({'error': 'Unauthorized access'}), 403
+                
             db.session.delete(polygon)
             db.session.commit()
             return '', 204
