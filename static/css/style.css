@@ -37,6 +37,22 @@ gmp-map-3d {
     display: inline-block;
     vertical-align: middle;
 }
+.navbar {
+    min-height: 40px;
+}
+
+.navbar-brand {
+    padding: 0;
+    margin: 0;
+    line-height: 40px;
+}
+
+.navbar img {
+    height: 24px;
+    width: auto;
+    margin: 8px;
+}
+
 .control-panel img {
     height: 30px;
     width: auto;
