@@ -14,10 +14,12 @@ async function initMap() {
             </div>
         `;
 
-        // Wait for the Google Maps API to be fully loaded
-        if (!window.google || !window.google.maps) {
-            throw new Error('Google Maps API not loaded. Please check your API key and internet connection.');
-        }
+        // Load required Google Maps libraries
+        const { Map3DElement } = await google.maps.importLibrary("maps3d");
+        await Promise.all([
+            google.maps.importLibrary("places"),
+            google.maps.importLibrary("elevation")
+        ]);
 
         // Import required libraries with proper error handling
         let Map3DElement, Autocomplete, ElevationService;
