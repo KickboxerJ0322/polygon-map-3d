@@ -40,10 +40,9 @@
     </div>
  
     <!-- メインのアプリコンテンツをこのdivで囲む -->
-    <div id="app-content" style="display:none;">
+    <div id="app-content" style="display: none; height: calc(100vh - 60px);">
         <div class="container-fluid">
-    <div class="container-fluid">
-        <div class="row">
+            <div class="row">
             <!-- Control Panel -->
             <div class="col-md-3">
                 <div class="control-panel">
@@ -283,21 +282,22 @@
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
                 // ログイン状態
-                loginForm.style.display = 'none';
-                signupForm.style.display = 'none';
-                userInfo.style.display = 'block';
-                userEmailSpan.textContent = user.email;
-                document.getElementById('app-content').style.display = 'block'; // アプリコンテンツを表示
-                // マップの初期化（ここでinitMapを呼び出します）
-                initMap();
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('signup-form').style.display = 'none';
+                document.getElementById('user-email').textContent = user.email;
+                document.getElementById('app-content').style.display = 'block';
+                // initMapの呼び出しを確実に行う
+                if (typeof initMap === 'function') {
+                    initMap().catch(error => {
+                        console.error('Map initialization error:', error);
+                    });
+                }
             } else {
                 // ログアウト状態
-                loginForm.style.display = 'block';
-                signupForm.style.display = 'none';
-                userInfo.style.display = 'none';
-                loginEmail.value = '';
-                loginPassword.value = '';
-                document.getElementById('app-content').style.display = 'none'; // アプリコンテンツを非表示
+                document.getElementById('login-form').style.display = 'block';
+                document.getElementById('signup-form').style.display = 'none';
+                document.getElementById('app-content').style.display = 'none';
+                document.getElementById('user-email').textContent = '';
             }
         });
     </script>
