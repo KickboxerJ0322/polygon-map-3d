@@ -9,6 +9,12 @@ let polygons = [];
 
 async function createPolygon() {
     try {
+        // ユーザー認証チェックを最初に行う
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            throw new Error('ユーザー認証が必要です。');
+        }
+
         // gmp-polygon-3dカスタム要素を作成
         const polygon = document.createElement('gmp-polygon-3d');
         
@@ -226,7 +232,6 @@ async function deletePolygon(id) {
         console.error('エラー:', error.message);
         alert(error.message);
     }
-}
 }
 let currentEditingId = null;
 
