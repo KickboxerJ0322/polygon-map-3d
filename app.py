@@ -33,10 +33,10 @@ def get_polygons():
     if not user_id:
         return jsonify({'error': 'Authentication required'}), 401
         
+    # ユーザーIDでフィルタリング
     polygons = Polygon.query.filter_by(user_id=user_id).all()
     return jsonify([{
         'id': p.id,
-        'user_id': p.user_id,
         'name': p.name,
         'coordinates': p.coordinates,
         'height': p.height,

@@ -118,22 +118,31 @@ function updatePolygonTable() {
 }
 
 async function loadPolygons() {
-    const user = firebase.auth().currentUser;
-    if (!user) {
-        console.warn('ユーザーが認証されていません。');
-        return;
-    }
-    
-    const response = await fetch('/api/polygons', {
-        headers: {
-            'X-Firebase-UserId': user.uid
+    try {
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            console.warn('ユーザーが認証されていません。');
+            return;
         }
-    });
-    if (response.ok) {
+        
+        const response = await fetch('/api/polygons', {
+            headers: {
+                'X-Firebase-UserId': user.uid
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('ポリゴンの読み込みに失敗しました。');
+        }
+        
         polygons = await response.json();
         updatePolygonTable();
         
-        // Recreate polygons on map
+        // 地図上のポリゴンをクリア
+        const existingPolygons = map3DElement.querySelectorAll('gmp-polygon-3d');
+        existingPolygons.forEach(polygon => polygon.remove());
+        
+        // ポリゴンを再描画
         const { Polygon3DElement, AltitudeMode } = await google.maps.importLibrary("maps3d");
         
         polygons.forEach(polygonData => {
@@ -150,6 +159,9 @@ async function loadPolygons() {
             polygon.outerCoordinates = polygonData.coordinates;
             map3DElement.append(polygon);
         });
+    } catch (error) {
+        console.error('ポリゴンの読み込みエラー:', error);
+        alert('ポリゴンの読み込み中にエラーが発生しました。');
     }
 }
 
