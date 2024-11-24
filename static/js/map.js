@@ -22,7 +22,6 @@ async function initMap() {
         ]);
 
         // Import required libraries with proper error handling
-        let Map3DElement, Autocomplete, ElevationService;
         try {
             const [maps3d, places, elevation] = await Promise.all([
                 google.maps.importLibrary("maps3d"),
@@ -30,9 +29,9 @@ async function initMap() {
                 google.maps.importLibrary("elevation")
             ]);
             
-            Map3DElement = maps3d.Map3DElement;
-            Autocomplete = places.Autocomplete;
-            ElevationService = elevation.ElevationService;
+            const { Map3DElement } = maps3d;
+            const { Autocomplete } = places;
+            const { ElevationService } = elevation;
         } catch (e) {
             throw new Error("Failed to load required Google Maps APIs: " + e.message);
         }
