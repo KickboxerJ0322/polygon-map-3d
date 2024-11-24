@@ -21,15 +21,7 @@ async function initMap() {
             google.maps.importLibrary("elevation")
         ]);
 
-        // Import required libraries with proper error handling
-        try {
-            await Promise.all([
-                google.maps.importLibrary("places"),
-                google.maps.importLibrary("elevation")
-            ]);
-        } catch (e) {
-            throw new Error("Failed to load required Google Maps APIs: " + e.message);
-        }
+        // Libraries are already imported above
         
         // Ensure custom element is defined
         if (!customElements.get('gmp-map-3d')) {
