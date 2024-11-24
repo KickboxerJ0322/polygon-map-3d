@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from flask import Flask, render_template, jsonify, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
@@ -6,7 +7,6 @@ from flask_login import LoginManager, current_user, login_user, logout_user, log
 from authlib.integrations.flask_client import OAuth
 from flask_migrate import Migrate
 from werkzeug.utils import redirect
-from flask_migrate import Migrate
 
 class Base(DeclarativeBase):
     pass
@@ -15,6 +15,7 @@ db = SQLAlchemy(model_class=Base)
 app = Flask(__name__)
 
 app.secret_key = os.environ.get("FLASK_SECRET_KEY") or "a secret key"
+app.permanent_session_lifetime = timedelta(days=7)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
@@ -27,6 +28,8 @@ migrate = Migrate(app, db)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+login_manager.login_message = 'このページにアクセスするにはログインが必要です。'
+login_manager.login_message_category = 'info'
 
 # Initialize OAuth
 oauth = OAuth(app)
@@ -49,6 +52,7 @@ def load_user(user_id):
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
+    session['next'] = request.args.get('next')
     redirect_uri = url_for('oauth_callback', _external=True)
     return oauth.google.authorize_redirect(redirect_uri)
 
@@ -76,7 +80,9 @@ def oauth_callback():
             db.session.commit()
         
         login_user(user)
-        return redirect(url_for('index'))
+        next_page = session.get('next')
+        session.pop('next', None)
+        return redirect(next_page or url_for('index'))
     except Exception as e:
         print(f"OAuth callback error: {str(e)}")
         return redirect(url_for('login'))
