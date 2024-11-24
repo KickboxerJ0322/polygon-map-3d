@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from sqlalchemy.orm import DeclarativeBase
 
 class Base(DeclarativeBase):
@@ -15,6 +16,7 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
 }
+migrate = Migrate(app, db)
 db.init_app(app)
 
 @app.route('/')
@@ -27,9 +29,14 @@ def index():
 @app.route('/api/polygons', methods=['GET'])
 def get_polygons():
     from models import Polygon
-    polygons = Polygon.query.all()
+    user_id = request.headers.get('X-Firebase-UserId')
+    if not user_id:
+        return jsonify({'error': 'Authentication required'}), 401
+        
+    polygons = Polygon.query.filter_by(user_id=user_id).all()
     return jsonify([{
         'id': p.id,
+        'user_id': p.user_id,
         'name': p.name,
         'coordinates': p.coordinates,
         'height': p.height,
@@ -43,8 +50,16 @@ def get_polygons():
 @app.route('/api/polygons', methods=['POST'])
 def create_polygon():
     from models import Polygon
-    data = request.json
+    user_id = request.headers.get('X-Firebase-UserId')
+    if not user_id:
+        return jsonify({'error': 'Authentication required'}), 401
+        
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
     polygon = Polygon()
+    polygon.user_id = user_id
     polygon.name = data.get('name', 'Unnamed Polygon')
     polygon.coordinates = data.get('coordinates', [])
     polygon.height = data.get('height', 300)

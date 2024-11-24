@@ -96,10 +96,16 @@ async function createPolygon() {
         stroke_width: Number(document.getElementById('stroke-width').value)
     };
     
+    const user = firebase.auth().currentUser;
+    if (!user) {
+        throw new Error('ユーザー認証が必要です。');
+    }
+    
     const response = await fetch('/api/polygons', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'X-Firebase-UserId': user.uid
         },
         body: JSON.stringify(polygonData)
     });
@@ -140,7 +146,17 @@ function updatePolygonTable() {
 }
 
 async function loadPolygons() {
-    const response = await fetch('/api/polygons');
+    const user = firebase.auth().currentUser;
+    if (!user) {
+        console.warn('ユーザーが認証されていません。');
+        return;
+    }
+    
+    const response = await fetch('/api/polygons', {
+        headers: {
+            'X-Firebase-UserId': user.uid
+        }
+    });
     if (response.ok) {
         polygons = await response.json();
         updatePolygonTable();
