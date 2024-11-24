@@ -7,6 +7,18 @@
     <link rel="icon" type="image/png" href="/static/images/png_Polygon_map_3d.png">
 </head>
 <body>
+    <div id="auth-container" class="mb-3">
+      <div id="user-info" style="display: none;">
+        <p>ログイン中: <span id="user-email"></span></p>
+        <button id="logout-button" class="btn btn-secondary">ログアウト</button>
+      </div>
+      <div id="login-form">
+        <input type="email" id="login-email" class="form-control mb-2" placeholder="メールアドレス">
+        <input type="password" id="login-password" class="form-control mb-2" placeholder="パスワード">
+        <button id="login-button" class="btn btn-primary">ログイン</button>
+        <button id="signup-button" class="btn btn-link">新規登録</button>
+      </div>
+    </div>
     <div class="container-fluid">
         <div class="row">
             <!-- Control Panel -->
@@ -186,5 +198,84 @@
     </script>
     <script src="/static/js/map.js"></script>
     <script src="/static/js/polygon.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script>
+      // Firebaseの設定
+      var firebaseConfig = {
+        apiKey: "AIzaSyCQsUSYEug5PvfKAZ0TEkOrFqOn-lPRXC8",
+        authDomain: "polygon-map-3d.firebaseapp.com",
+        projectId: "polygon-map-3d",
+        storageBucket: "polygon-map-3d.firebasestorage.app",
+        messagingSenderId: "97202006099",
+        appId: "1:97202006099:web:ec30f34c86813d612dfea6"
+      };
+      // Firebaseの初期化
+      firebase.initializeApp(firebaseConfig);
+    </script>
+    <script>
+      // 要素の取得
+      const loginForm = document.getElementById('login-form');
+      const userInfo = document.getElementById('user-info');
+      const userEmailSpan = document.getElementById('user-email');
+      const loginEmail = document.getElementById('login-email');
+      const loginPassword = document.getElementById('login-password');
+      const loginButton = document.getElementById('login-button');
+      const signupButton = document.getElementById('signup-button');
+      const logoutButton = document.getElementById('logout-button');
+
+      // ログインボタンのクリックイベント
+      loginButton.addEventListener('click', () => {
+        const email = loginEmail.value;
+        const password = loginPassword.value;
+        firebase.auth().signInWithEmailAndPassword(email, password)
+          .catch(error => {
+            alert('ログインエラー: ' + error.message);
+          });
+      });
+
+      // 新規登録ボタンのクリックイベント
+      signupButton.addEventListener('click', () => {
+        const email = loginEmail.value;
+        const password = loginPassword.value;
+        firebase.auth().createUserWithEmailAndPassword(email, password)
+          .catch(error => {
+            alert('登録エラー: ' + error.message);
+          });
+      });
+
+      // ログアウトボタンのクリックイベント
+      logoutButton.addEventListener('click', () => {
+        firebase.auth().signOut();
+      });
+
+      // 認証状態の監視
+      firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+          // ログイン状態
+          loginForm.style.display = 'none';
+          userInfo.style.display = 'block';
+          userEmailSpan.textContent = user.email;
+        } else {
+          // ログアウト状態
+          loginForm.style.display = 'block';
+          userInfo.style.display = 'none';
+          loginEmail.value = '';
+          loginPassword.value = '';
+        }
+      });
+    </script>
+    <script>
+      firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+          // ユーザーがログインしている場合、アプリを表示
+          document.getElementById('app-content').style.display = 'block';
+        } else {
+          // ユーザーがログインしていない場合、ログインフォームを表示
+          document.getElementById('app-content').style.display = 'none';
+        }
+      });
+    </script>
 </body>
 </html>

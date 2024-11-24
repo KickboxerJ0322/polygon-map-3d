@@ -43,3 +43,9 @@ gmp-map-3d {
     object-fit: contain;
     background: transparent;
 }
+#auth-container {
+margin-bottom: 20px;
+}
+#login-form, #user-info {
+max-width: 300px;
+}
