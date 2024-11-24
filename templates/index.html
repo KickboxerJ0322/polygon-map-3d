@@ -10,13 +10,13 @@
     <div id="auth-container" class="mb-3">
       <div id="user-info" style="display: none;">
         <p>ログイン中: <span id="user-email"></span></p>
-        <button id="logout-button" class="btn btn-secondary">ログアウト</button>
+        <button id="logout-button" type="button" class="btn btn-secondary">ログアウト</button>
       </div>
       <div id="login-form">
         <input type="email" id="login-email" class="form-control mb-2" placeholder="メールアドレス">
         <input type="password" id="login-password" class="form-control mb-2" placeholder="パスワード">
-        <button id="login-button" class="btn btn-primary">ログイン</button>
-        <button id="signup-button" class="btn btn-link">新規登録</button>
+        <button id="login-button" type="button" class="btn btn-primary">ログイン</button>
+        <button id="signup-button" type="button" class="btn btn-link">新規登録</button>
       </div>
     </div>
     <div class="container-fluid">
@@ -226,7 +226,8 @@
       const logoutButton = document.getElementById('logout-button');
 
       // ログインボタンのクリックイベント
-      loginButton.addEventListener('click', () => {
+      loginButton.addEventListener('click', (e) => {
+        e.preventDefault(); // デフォルトの動作を防止
         const email = loginEmail.value;
         const password = loginPassword.value;
         firebase.auth().signInWithEmailAndPassword(email, password)
