@@ -1,18 +1,27 @@
 <!DOCTYPE html>
 <html data-bs-theme="dark">
 <head>
-    <title>3D Polygon Map Creator</title>
+    <title>Polygon Map 3D</title>
     <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
     <link href="/static/css/style.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="/static/images/png_Polygon_map_3d.png">
 </head>
 <body>
-    <div id="auth-container" class="mb-3">
-        <div id="user-info" style="display: none;">
-            <p>ログイン中: <span id="user-email"></span></p>
-            <button id="logout-button" type="button" class="btn btn-secondary">ログアウト</button>
+    <!-- ヘッダー部分 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center">
+                <img src="/static/images/rounded_polygon_map_3d.png" alt="Polygon Map 3D" class="me-2" style="height: 30px; width: auto;">
+                <span class="navbar-brand mb-0">Polygon Map 3D</span>
+            </div>
+            <div class="ms-auto">
+                <span class="text-light me-3">ログイン中: <span id="user-email"></span></span>
+                <button id="logout-button" type="button" class="btn btn-outline-light">ログアウト</button>
+            </div>
         </div>
+    </nav>
 
+    <div id="auth-container" class="mb-3">
         <!-- ログインフォーム -->
         <div id="login-form">
             <input type="email" id="login-email" class="form-control mb-2" placeholder="メールアドレス">
@@ -38,10 +47,6 @@
             <!-- Control Panel -->
             <div class="col-md-3">
                 <div class="control-panel">
-                    <div class="d-flex align-items-center mb-3">
-                        <img src="/static/images/rounded_polygon_map_3d.png" alt="Polygon Map 3D" class="me-2">
-                        <h4 class="mb-0">Polygon Map 3D</h4>
-                    </div>
                     <div class="search-box mb-3">
                         <input type="text" id="pac-input" class="form-control" placeholder="Navigate to a place">
                     </div>
