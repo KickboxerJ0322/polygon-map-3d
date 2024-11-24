@@ -12,19 +12,9 @@
             <!-- Control Panel -->
             <div class="col-md-3">
                 <div class="control-panel">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="d-flex align-items-center">
-                            <img src="/static/images/rounded_polygon_map_3d.png" alt="Polygon Map 3D" class="me-2">
-                            <h4 class="mb-0">Polygon Map 3D</h4>
-                        </div>
-                        {% if current_user.is_authenticated %}
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">{{ current_user.name }}</span>
-                                <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Logout</a>
-                            </div>
-                        {% else %}
-                            <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm">Login with Google</a>
-                        {% endif %}
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="/static/images/rounded_polygon_map_3d.png" alt="Polygon Map 3D" class="me-2">
+                        <h4 class="mb-0">Polygon Map 3D</h4>
                     </div>
                     <div class="search-box mb-3">
                         <input type="text" id="pac-input" class="form-control" placeholder="Navigate to a place">

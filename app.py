@@ -1,12 +1,7 @@
 import os
-from datetime import timedelta
-from flask import Flask, render_template, jsonify, request, redirect, url_for, session
+from flask import Flask, render_template, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
-from flask_login import LoginManager, current_user, login_user, logout_user, login_required
-from authlib.integrations.flask_client import OAuth
-from flask_migrate import Migrate
-from werkzeug.utils import redirect
 
 class Base(DeclarativeBase):
     pass
@@ -15,91 +10,24 @@ db = SQLAlchemy(model_class=Base)
 app = Flask(__name__)
 
 app.secret_key = os.environ.get("FLASK_SECRET_KEY") or "a secret key"
-app.permanent_session_lifetime = timedelta(days=7)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
 }
-
-# Initialize Flask extensions
 db.init_app(app)
-migrate = Migrate(app, db)
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-login_manager.login_message = 'このページにアクセスするにはログインが必要です。'
-login_manager.login_message_category = 'info'
-
-# Initialize OAuth
-oauth = OAuth(app)
-oauth.register(
-    name='google',
-    client_id=os.environ.get('GOOGLE_OAUTH_CLIENT_ID'),
-    client_secret=os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET'),
-    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={
-        'scope': 'openid email profile'
-    }
-)
-
-@login_manager.user_loader
-def load_user(user_id):
-    from models import User
-    return User.query.get(int(user_id))
-
-@app.route('/login')
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-    session['next'] = request.args.get('next')
-    redirect_uri = url_for('oauth_callback', _external=True)
-    return oauth.google.authorize_redirect(redirect_uri)
-
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('index'))
-
-@app.route('/oauth-callback')
-def oauth_callback():
-    try:
-        token = oauth.google.authorize_access_token()
-        user_info = oauth.google.parse_id_token(token)
-        
-        from models import User
-        user = User.query.filter_by(google_id=user_info['sub']).first()
-        
-        if not user:
-            user = User(
-                google_id=user_info['sub'],
-                email=user_info['email'],
-                name=user_info['name']
-            )
-            db.session.add(user)
-            db.session.commit()
-        
-        login_user(user)
-        next_page = session.get('next')
-        session.pop('next', None)
-        return redirect(next_page or url_for('index'))
-    except Exception as e:
-        print(f"OAuth callback error: {str(e)}")
-        return redirect(url_for('login'))
 
 @app.route('/')
-@login_required
 def index():
     maps_api_key = os.environ.get('GOOGLE_MAPS_API_KEY')
     if not maps_api_key:
         return "Google Maps API key is not configured", 500
-    return render_template('index.html', maps_api_key=maps_api_key, user=current_user)
+    return render_template('index.html', maps_api_key=maps_api_key)
 
 @app.route('/api/polygons', methods=['GET'])
-@login_required
 def get_polygons():
     from models import Polygon
-    polygons = Polygon.query.filter_by(user_id=current_user.id).all()
+    polygons = Polygon.query.all()
     return jsonify([{
         'id': p.id,
         'name': p.name,
@@ -113,13 +41,11 @@ def get_polygons():
     } for p in polygons])
 
 @app.route('/api/polygons', methods=['POST'])
-@login_required
 def create_polygon():
     from models import Polygon
     data = request.json
     polygon = Polygon()
     polygon.name = data.get('name', 'Unnamed Polygon')
-    polygon.user_id = current_user.id
     polygon.coordinates = data.get('coordinates', [])
     polygon.height = data.get('height', 300)
     polygon.fill_color = data.get('fill_color', '#ff0000')
@@ -133,10 +59,9 @@ def create_polygon():
     return jsonify({'id': polygon.id}), 201
 
 @app.route('/api/polygons/<int:id>', methods=['PUT'])
-@login_required
 def update_polygon(id):
     from models import Polygon
-    polygon = Polygon.query.filter_by(id=id, user_id=current_user.id).first_or_404()
+    polygon = Polygon.query.get_or_404(id)
     data = request.json
     
     # Update polygon with new values, keeping existing ones if not provided
@@ -154,7 +79,6 @@ def update_polygon(id):
 
 
 @app.route('/api/polygons/<int:id>', methods=['DELETE', 'PUT'])
-@login_required
 def handle_polygon(id):
     from models import Polygon
     if request.method == 'PUT':
