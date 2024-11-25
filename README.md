@@ -1,7 +1,7 @@
 ﻿# Polygon Map 3D - ポリゴンマップ3D
 - Polygon Map 3D is a 3D map that uses the latest feature of Google's Maps JavaScript API, "Photorealistic 3D Maps."
 - Polygon Map 3Dは、Googleが提供しているMaps JavaScript APIの最新機能「Photorealistic 3D Maps」を利用した3Dマップです。
-![画像](https://kickboxerj0322.github.io/bus-map-3d/061_page.png)
+![画像](https://kickboxerj0322.github.io/polygon-map-3d/001_view.png)
 - **[youtube](https://youtu.be/53xpxv1Lrns)**
 
 ## Basic operation - 基本動作
